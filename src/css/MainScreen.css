@@ -1,0 +1,25 @@
+#leftbox { 
+    float:left;  
+    width:20%; 
+    height:auto;
+    background-color: antiquewhite;
+    padding: 10px;
+    margin: 20px;
+} 
+#middlebox{ 
+    float:left;  
+    width:40%; 
+    height:auto;
+    padding: 10px;
+    margin: 20px; 
+    background-color: antiquewhite;
+    text-align: center;
+} 
+#rightbox{ 
+    float:right; 
+    width:20%; 
+    height:auto; 
+    background-color: antiquewhite;
+    padding: 10px;
+    margin: 20px;
+} 
