@@ -1,5 +1,6 @@
 import React from "react";
 import Webcam from "react-webcam";
+import Popup from "./Popup";
 import ListItem from '@material-ui/core/ListItem';
 import List from '@material-ui/core/List';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -59,6 +60,11 @@ function MainScreen() {
             )
             }
           </List>
+        </div>
+
+        <div>
+          <button onClick={(e) => this.setState({ isOpen: true })}>Unrecognised/Register</button>
+          <Popup></Popup>
         </div>
       </div>
 
