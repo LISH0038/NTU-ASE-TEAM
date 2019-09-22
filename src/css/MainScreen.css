@@ -3,14 +3,15 @@
     width:20%; 
     height:auto;
     background-color: antiquewhite;
+    /* orangered */
     padding: 10px;
     margin: 20px;
 } 
 #middlebox{ 
     float:left;  
-    width:40%; 
+    width:auto; 
     height:auto;
-    padding: 10px;
+    padding: 20px;
     margin: 20px; 
     background-color: antiquewhite;
     text-align: center;
@@ -19,7 +20,13 @@
     float:right; 
     width:20%; 
     height:auto; 
-    background-color: antiquewhite;
-    padding: 10px;
     margin: 20px;
+} 
+#latelist{ 
+    background-color: yellow;
+    padding: 10px;
+} 
+#signedlist{ 
+    background-color: forestgreen;
+    padding: 10px;
 } 
