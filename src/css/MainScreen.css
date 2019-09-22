@@ -1,32 +1,32 @@
-#leftbox { 
-    float:left;  
-    width:20%; 
-    height:auto;
-    background-color: antiquewhite;
-    /* orangered */
-    padding: 10px;
-    margin: 20px;
-} 
-#middlebox{ 
-    float:left;  
-    width:auto; 
-    height:auto;
-    padding: 20px;
-    margin: 20px; 
-    background-color: antiquewhite;
-    text-align: center;
-} 
-#rightbox{ 
-    float:right; 
-    width:20%; 
-    height:auto; 
-    margin: 20px;
-} 
-#latelist{ 
-    background-color: yellow;
-    padding: 10px;
-} 
-#signedlist{ 
-    background-color: forestgreen;
-    padding: 10px;
-} 
+#leftbox {
+  float: left;
+  width: 20%;
+  height: auto;
+  background-color: rgb(190, 13, 13);
+  /* orangered */
+  padding: 10px;
+  margin: 30px;
+}
+#middlebox {
+  float: left;
+  width: auto;
+  height: auto;
+  padding: 20px;
+  margin: 30px;
+  background-color: bisque;
+  text-align: center;
+}
+#rightbox {
+  float: right;
+  width: 20%;
+  height: auto;
+  margin: 30px;
+}
+#latelist {
+  background-color: rgb(226, 223, 7);
+  padding: 10px;
+}
+#signedlist {
+  background-color: forestgreen;
+  padding: 10px;
+}
