@@ -1,6 +1,6 @@
 import React from "react";
 import Webcam from "react-webcam";
-import Popup from "./Popup";
+import popUp from "./Popup";
 import ListItem from '@material-ui/core/ListItem';
 import List from '@material-ui/core/List';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -10,6 +10,8 @@ import "../css/MainScreen.css";
 function MainScreen() {
   const expectedStudents = ["expectedStudent1", "expectedStudent2", "expectedStudent3"] // references to components
   const recognizedStudents = ["recognizedStudent1", "recognizedStudent2", "recognizedStudent3"]
+
+
 
   return (
     <div>
@@ -63,14 +65,12 @@ function MainScreen() {
         </div>
 
         <div>
-          <button onClick={(e) => this.setState({ isOpen: true })}>Unrecognised/Register</button>
-          <Popup></Popup>
+          <button onClick={popUp.bind} > Unrecognised / Register</button>
         </div>
       </div>
-
-
     </div>
   );
 }
 
 export default MainScreen;
+

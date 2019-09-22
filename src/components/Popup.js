@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+
 import Webcam from "react-webcam";
 
 let popupStyles = {
@@ -36,9 +37,28 @@ let webcamStyle = {
     marginTop: '10px'
 }
 
+
+function popUp() {
+    return (
+        <div style={popupStyles}>
+            <h1> Please rotate your face!</h1>
+            <Webcam style={webcamStyle}
+                width={800}
+                height={600}
+            />
+            <button style={popupButtonStyle}>Done!</button>
+        </div >
+    )
+}
+
+export default popUp;
+
+/*
+
 class Popup extends Component {
     render() {
-        return (
+
+        let Popup = (
             <div style={popupStyles}>
                 <h1> Please rotate your face!</h1>
                 <Webcam style={webcamStyle}
@@ -47,8 +67,22 @@ class Popup extends Component {
                 />
                 <button style={popupButtonStyle}>Done!</button>
             </div >
-        )
+
+        );
+
+        if (!this.props.isOpen) {
+            Popup = null;
+        }
+
+        return (
+            <div >
+                {Popup}
+            </div >
+        );
     }
+
 }
 
 export default Popup;
+
+*/
