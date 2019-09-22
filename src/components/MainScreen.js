@@ -11,55 +11,57 @@ function MainScreen() {
   const recognizedStudents = ["recognizedStudent1", "recognizedStudent2", "recognizedStudent3"]
 
   return (
-    <div> 
+    <div>
       <div id="leftbox" >
-      <h1>Unsigned List</h1>
-      <List> 
-        {expectedStudents.map((comp, index) =>  
-          <ListItem>
-            <ListItemText primary = {index+1+'. '+comp}/>
-          </ListItem>
+        <h1>Absent List</h1>
+        <List>
+          {expectedStudents.map((comp, index) =>
+            <ListItem>
+              <ListItemText primary={index + 1 + '. ' + comp} />
+            </ListItem>
           )
-        }
+          }
         </List>
       </div>
 
-      <div id="middlebox" style={{textAlign:"center"}}>
-      <h1>Main Camera</h1>
-      <br></br>
+      <div id="middlebox" style={{ textAlign: "center" }}>
+        <h1>Main Camera</h1>
+        <br></br>
         <Webcam
           audio={false}
-          flex ={1}
+          flex={1}
+          width={900}
+          height={700}
           screenshotFormat="image/jpeg" />
       </div>
-      
+
       <div id="rightbox">
-        <div id="signedlist" >  
-        <h1>Signed List</h1>    
-        <List> 
-          {recognizedStudents.map((comp, index) =>  
-            <ListItem>
-              <ListItemText primary = {index+1+'. '+comp}/>
-            </ListItem>
+        <div id="signedlist" >
+          <h1>Present List</h1>
+          <List>
+            {recognizedStudents.map((comp, index) =>
+              <ListItem>
+                <ListItemText primary={index + 1 + '. ' + comp} />
+              </ListItem>
             )
-          }
+            }
           </List>
         </div>
 
         <br></br>
-        <div id="latelist" >  
-        <h1>Late List</h1>    
-        <List> 
-          {recognizedStudents.map((comp, index) =>  
-            <ListItem>
-              <ListItemText primary = {index+1+'. '+comp}/>
-            </ListItem>
+        <div id="latelist" >
+          <h1>Late List</h1>
+          <List>
+            {recognizedStudents.map((comp, index) =>
+              <ListItem>
+                <ListItemText primary={index + 1 + '. ' + comp} />
+              </ListItem>
             )
-          }
+            }
           </List>
         </div>
       </div>
-      
+
 
     </div>
   );
