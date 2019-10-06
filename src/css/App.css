@@ -19,3 +19,21 @@ nav {
   justify-content: space-around;
   list-style: none;
 }
+
+.loginForm {
+  width: 100%;
+  padding-top: 5cm;
+  max-width: 400px;
+  padding: 15px;
+  margin: auto;
+  height: 275px;
+  position: center;
+  background: rgb(42, 52, 56);
+  border-radius: 8px;
+}
+
+.btnLogin {
+  max-width: 400px;
+  place-content: center;
+  margin-left: 820px;
+}
