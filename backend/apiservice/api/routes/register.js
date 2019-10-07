@@ -1,10 +1,17 @@
 var express = require('express');
 var router = express.Router();
 var pool = require('../db/pool');
+var cachedData = require('./cache');
 
-/* GET home page. */
+/* Register new photos. */
 router.post('/', function(req, res, next) {
-  res.json({"register_body": req.body});
+  return res.status(upload_photos(req.body)).send();
 });
+
+function upload_photos(images){
+  // todo: Simon
+  const status = 200;
+  return status;
+}
 
 module.exports = router;

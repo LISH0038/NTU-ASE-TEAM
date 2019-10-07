@@ -1,0 +1,130 @@
+{
+  "class": [
+    {
+      "class_index":10000,
+      "late_time": 15,
+      "absent_time": 30
+    },
+    {
+      "class_index":10001,
+      "late_time": 10,
+      "absent_time": 20
+    },
+    {
+      "class_index":10002,
+      "late_time": 15,
+      "absent_time": 20
+    },
+    {
+      "class_index":10003,
+      "late_time": 10,
+      "absent_time": 30
+    },
+    {
+      "class_index":10004,
+      "late_time": 10,
+      "absent_time": 20
+    },
+    {
+      "class_index":10005,
+      "late_time": 15,
+      "absent_time": 30
+    }
+  ],
+  "studentClass": [
+    {
+      "id": 1,
+      "class_index": 10001,
+      "student_id": "U0000001J"
+    },
+    {
+      "id": 2,
+      "class_index": 10001,
+      "student_id": "U0000002J"
+    },
+    {
+      "id": 3,
+      "class_index": 10002,
+      "student_id": "U0000002J"
+    }
+  ],
+  "class_session": [
+    {
+      "class_index": 10001,
+      "session_id": 1,
+      "start_time": 1570176000
+    },
+    {
+      "class_index": 10001,
+      "session_id": 2,
+      "start_time": 1570374781
+    },
+    {
+      "class_index": 10002,
+      "session_id": 3,
+      "start_time": 1570574000
+    }
+  ],
+  "report": [
+    {
+      "session_id": 1,
+      "student_id": "U0000001J",
+      "arrival_time": 1570176000,
+      "status": "on-time"
+    },
+    {
+      "session_id": 1,
+      "student_id": "U0000002J",
+      "arrival_time": 99999999999,
+      "status": "absent"
+    },
+    {
+      "session_id": 2,
+      "student_id": "U0000001J",
+      "arrival_time": 1570375934,
+      "status": "late"
+    },
+    {
+      "session_id": 2,
+      "student_id": "U0000002J",
+      "arrival_time": 99999999999,
+      "status": "absent"
+    },
+    {
+      "session_id": 3,
+      "student_id": "U0000002J",
+      "arrival_time": 99999999999,
+      "status": "absent"
+    }
+  ],
+  "students": [
+    {
+      "student_id": "U0000001J",
+      "name": "Harry Cao",
+      "email": "harry@e.ntu.edu.sg"
+    },
+    {
+      "student_id": "U0000002J",
+      "name": "Zeng Jinpo",
+      "email": "zeng@e.ntu.edu.sg"
+    }
+  ],
+  "mail": [
+    {
+      "session_id": 1,
+      "mail_sent_status":true,
+      "student_id": "U0000001J"
+    },
+    {
+      "session_id": 2,
+      "mail_sent_status":true,
+      "student_id": "U0000001J"
+    },
+    {
+      "session_id": 3,
+      "mail_sent_status":false,
+      "student_id": "U0000001J"
+    }
+  ]
+
+}

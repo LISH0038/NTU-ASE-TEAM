@@ -3,7 +3,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var courseRouter = require('./routes/course');
+var classRouter = require('./routes/class');
 var recognitionRouter = require('./routes/recognition');
 var registerRouter = require('./routes/register');
 var recordRouter = require('./routes/record');
@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use('/index', courseRouter);
+app.use('/index', classRouter);
 app.use('/recognition', recognitionRouter);
 app.use('/register', registerRouter);
 app.use('/record', recordRouter);
