@@ -1,71 +1,60 @@
 var express = require('express');
 var router = express.Router();
 var pool = require('../db/pool');
-const data = require('../data.json');
-var cachedData = require('./cache');
 var getStudentStatus = require('../utility/getStudentStatus');
-var getStudentName = require('../utility/getStudentName');
 
 router.post('/', function(req, res, next) {
-  const studentIds = getRecognisedIds(req.body,cachedData.absentList);
-  const recognizedStudentList = [];
-  studentIds.forEach(studentId =>{
-    const studentName = getStudentName(studentId);
-    // const current_time = Math.floor(Date.now()/1000);
-    const current_time = 1570176001;
-    const status = getStudentStatus(current_time,
-        cachedData.session_start_time,
-        cachedData.session_late_time,
-        cachedData.session_absent_time);
+  var absentStudents = [];
+  var recognizedStudentList = [];
 
-    // returned list
-    recognizedStudentList.push({
-      id: studentId,
-      name: studentName
-    });
+  pool.query('CALL get_absent_students(?)',[req.body.sessionId],function (err,rows,fields) {
+    if (err) return res.status(500).send('Error when retrieving the session');
+    if (rows[0].length == 0) return res.status(404).send('The session id was not found');
+    rows[0].forEach(row => absentStudents.push(row.student_id));
 
-    // update Report DB
-    updateReportDB(studentId,cachedData.session_id, current_time,status);
+    pool.query('CALL get_class_start_late_absent_time(?)',[req.body.sessionId],function (err,rows,fields) {
+      if (err) return res.status(500).send('Error when retrieving the session');
+      if (rows[0].length == 0) return res.status(404).send('The session id was not found');
+      var session_start_time = rows[0][0].start_time;
+      var session_late_time = session_start_time + rows[0][0].late_time*60;
+      var session_absent_time = session_start_time + rows[0][0].absent_time*60;
+      console.log("start:" + session_start_time + ";late:" + session_late_time + ";absent:" + session_absent_time);
 
-    // update cached data
-    if (status==="on-time") {
-      cachedData.presentList.unshift({
-        id: studentId,
-        name: studentName
-      });
-    } else if (status==="late"){
-      cachedData.lateList.unshift({
-        id: studentId,
-        name: studentName
-      });
-    }
-    if (status !== "absent") {
-      for (i = 0; i < cachedData.absentList.length; i++) {
-        if (cachedData.absentList[i].id === studentId) {
-          cachedData.absentList.splice(i, 1);
-          break;
-        }
+      // const current_time = Math.floor(Date.now()/1000);
+      const current_time = 1570176001;
+
+      const recognizedStudentIds = getRecognisedIds(req.body.image,absentStudents);
+      console.log("recognized: "+ recognizedStudentIds);
+      for (let i=0; i< recognizedStudentIds.length; i++){
+        var studentId = recognizedStudentIds[i];
+        pool.query('CALL get_student(?)',[studentId],function (err,rows,fields) {
+          var studentName = rows[0][0].student_name;
+          var status = getStudentStatus(current_time, session_start_time, session_late_time, session_absent_time);
+          // returned list
+          recognizedStudentList.push({
+            id: studentId,
+            name: studentName,
+            status: status
+          });
+
+          if (i == recognizedStudentIds.length-1){
+            console.log(recognizedStudentList);
+            return res.status(200).json(recognizedStudentList);
+          }
+
+          // todo: check update database
+          pool.query('CALL update_student_status(?,?,?,?)',[req.body.sessionId,studentId,status,current_time]);
+          console.log("session: " + req.body.sessionId + "; studentId: " + studentId + "; status: "+status+"; cur_time: " + current_time);
+        });
       }
-    }
-
+    });
   });
-  console.log( cachedData);
-  return res.status(200).json(recognizedStudentList);
+
 });
 
 function getRecognisedIds(image,possible_students){
   //todo: Simon recognition, return list of student IDs
   return ["U0000001J","U0000002J"];
-}
-
-function updateReportDB(studentId, sessionId, arrival_time,status){
-  // mock db
-  data.report.push({
-    session_id: sessionId,
-    studentId: studentId,
-    arrival_time: arrival_time,
-    status: status
-  });
 }
 
 module.exports = router;

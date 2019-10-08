@@ -2,10 +2,6 @@ var express = require('express');
 var router = express.Router();
 var pool = require('../db/pool');
 const Joi = require('joi');
-const data = require('../data.json');
-var cachedData = require('./cache');
-var getStudentName = require('../utility/getStudentName');
-var getStudentListIdAndName = require('../utility/getStudentListIdAndName');
 
 /* GET report. */
 router.get('/:sessionId', function(req, res, next) {
@@ -14,86 +10,85 @@ router.get('/:sessionId', function(req, res, next) {
   if (error)
     return res.status(400).send("The session index can only be integers.");
 
-  // 404 if the session index is not in the database
-  const sessions = data.class_session.filter(sessions => sessions.session_id === parseInt(req.params.sessionId));
-  if (!sessions) return res.status(404).send('The session index was not found');
-
-  const class_index = sessions[0].class_index;
-  const course = data.class.find(c => c.class_index === parseInt(class_index));
-  if (!course) return res.status(404).send('The class index was not found.');
-
-  const session_start_time = sessions[0].start_time;
-  const session_late_time = session_start_time + course.late_time*60;
-  const session_absent_time = session_start_time + course.absent_time*60;
-
-  const studentsInClass = data.studentClass.filter(c => c.class_index === parseInt(class_index));
-  const studentList = getStudentListIdAndName(studentsInClass);
-  var presentList = [];
+  var class_index;
+  var onTimeList =[];
   var lateList = [];
-  var absentList = studentList;
-  console.log(studentsInClass);
+  var absentList =[] ;
+  var session_start_time;
+  var session_late_time;
+  var session_absent_time;
 
-  /**
-   {
-      "session_id": 1,
-      "student_id": "U0000001J",
-      "arrival_time": 1570176000,
-      "status": "on-time"
-    }
-   */
-  const studentsInSession = data.report.filter(report=>report.session_id === parseInt(req.params.sessionId));
+  // 404 if the session index is not in the database
+  pool.query('CALL get_class_start_late_absent_time(?)',[req.params.sessionId],function (err,rows,fields) {
+    if (err) return res.status(500).send('Error when retrieving the session');
+    if (rows[0].length == 0) return res.status(404).send('The session id 1 was not found');
+    session_start_time = rows[0][0].start_time;
+    session_late_time = session_start_time + rows[0][0].late_time*60;
+    session_absent_time = session_start_time + rows[0][0].absent_time*60;
+    class_index = rows[0][0].class_index;
+    // console.log("session_start_time: " + session_start_time);
 
-  for (i=0;i<studentsInSession.length;i++){
-    if (studentsInSession[i].status==="on-time"){
-      presentList.unshift({
-        id:studentsInSession[i].student_id,
-        name:getStudentName(studentsInSession[i].student_id)
-      });
-
-      // remove from absentList
-      for (j = 0; j < absentList.length; j++) {
-        if (absentList[j].id === studentsInSession[i].student_id) {
-          absentList.splice(j, 1);
-          break;
-        }
+    pool.query('CALL get_on_time_students(?)',[req.params.sessionId],function (err,rows,fields) {
+      if (err) return res.status(500).send('Error when retrieving the session');
+      if (rows[0].length != 0) {
+        rows[0].forEach(row => onTimeList.unshift({
+          id: row.student_id,
+          name: row.student_name
+        }));
+        // console.log("on time list: " + onTimeList);
       }
 
-    } else if (studentsInSession[i].status==="late") {
-      lateList.unshift({
-        id: studentsInSession[i].student_id,
-        name: getStudentName(studentsInSession[i].student_id)
+      pool.query('CALL get_late_students(?)',[req.params.sessionId],function (err,rows,fields) {
+        if (err) return res.status(500).send('Error when retrieving the session');
+        if (rows[0].length != 0) {
+          rows[0].forEach(row => lateList.unshift({
+            id: row.student_id,
+            name: row.student_name
+          }));
+          // console.log("late time list: " + lateTimeList);
+        }
+
+        pool.query('CALL get_absent_students(?)',[req.params.sessionId],function (err,rows,fields) {
+          if (err) return res.status(500).send('Error when retrieving the session');
+          if (rows[0].length != 0) {
+            rows[0].forEach(row => absentList.unshift({
+              id: row.student_id,
+              name: row.student_name
+            }));
+            // console.log("absent time list: " + absentList);
+          }
+
+          // console.log(JSON.stringify({
+          //   index: class_index,
+          //   sessionId: req.params.sessionId,
+          //   schedule: {
+          //     startTime: session_start_time,
+          //     lateTime: session_late_time,
+          //     endTime: session_absent_time
+          //   },
+          //   onTimeList: onTimeList,
+          //   lateList: lateList,
+          //   absentList: absentList
+          // }));
+          return res.status(200).send({
+            index: class_index,
+            sessionId: req.params.sessionId,
+            schedule: {
+              startTime: session_start_time,
+              lateTime: session_late_time,
+              endTime: session_absent_time
+            },
+            onTimeList: onTimeList,
+            lateList: lateList,
+            absentList: absentList
+          });
+
+        });
+
       });
 
-      // remove from absentList
-      for (j = 0; j < absentList.length; j++) {
-        if (absentList[j].id === studentsInSession[i].student_id) {
-          absentList.splice(j, 1);
-          break;
-        }
-      }
-    }
-  }
+    });
 
-
-  // refresh cachedData
-  cachedData.class_index = course.class_index;
-  cachedData.session_id =  parseInt(req.params.sessionId);
-  cachedData.session_start_time = session_start_time;
-  cachedData.session_late_time = session_late_time;
-  cachedData.session_absent_time = session_absent_time;
-  cachedData.absentList = studentList;
-
-  return res.status(200).send({
-    "index": course.class_index,
-    "sessionId": parseInt(req.params.sessionId),
-    "schedule": {
-      "startTime": session_start_time,
-      "lateTime": session_late_time,
-      "endTime": session_absent_time
-    },
-    "presentList": presentList,
-    "lateList": lateList,
-    "absentList": absentList
   });
 
 });

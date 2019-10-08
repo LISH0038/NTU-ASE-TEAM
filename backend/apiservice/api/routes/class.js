@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/pool');
-const data = require('../data.json');
 const Joi = require('joi');
-var getStudentListIdAndName = require('../utility/getStudentListIdAndName');
 
 /* GET home page. */
 router.get('/:classId', function(req, res, next) {
@@ -17,9 +15,12 @@ router.get('/:classId', function(req, res, next) {
     if (rows[0].length == 0) return res.status(404).send('The class index was not found.');
     const course = rows[0][0];
 
-    pool.query('CALL get_session_at_time(?, ?)', [req.params.classId, Math.floor(Date.now() / 1000)], function (err, rows, fields) {
-      if (err) return res.status(500).send('Error when retriving session');
-      if (rows[0].length == 0) return res.status(404).send('The session index was not found');
+    // const current_time = Math.floor(Date.now()/1000);
+    const current_time = 1570176001;
+
+    pool.query('CALL get_session_at_time(?, ?)', [req.params.classId,current_time], function (err, rows, fields) {
+      if (err) return res.status(500).send('Error when retrieving the session');
+      if (rows[0].length == 0) return res.status(404).send('The session id was not found');
 
       const session = rows[0][0];
       const session_start_time = session.start_time;
@@ -51,6 +52,5 @@ function validateClass(classId){
   const schema = Joi.string().regex(pattern_class);
   return Joi.validate(classId,schema);
 }
-
 
 module.exports = router;
