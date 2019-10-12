@@ -10,6 +10,7 @@ function Nav() {
     fontSize: "35px",
     textAlign: "start",
     textDecoration: "none",
+    marginTop: "15px",
 
   };
 
@@ -18,10 +19,11 @@ function Nav() {
     fontSize: "25px",
     textAlign: "center",
     textDecoration: "none",
+    marginTop: "25px",
   };
 
   return (
-    <nav>
+    <nav >
       <u1 className="Nav-Links">
         <Link style={navStyle1} to="/home">
           <li>NTU E-tendance System</li>
@@ -33,7 +35,7 @@ function Nav() {
           <li>Summary Report</li>
         </Link>
       </u1>
-    </nav>
+    </nav >
   );
 }
 
