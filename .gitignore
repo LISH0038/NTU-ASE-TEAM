@@ -223,7 +223,6 @@ gradle-app.setting
 *.class
 
 # Generated files
-bin/
 gen/
 out/
 release/
@@ -334,7 +333,8 @@ buck-out/
 # General
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 
