@@ -1,11 +1,17 @@
 version: '3.3'
 services:
+  webserver:
+    image: nginx:mainline-alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - ./nginx/nginx-conf:/etc/nginx/conf.d
+    depends_on:
+      - apiservice
   apiservice:
     build: ./apiservice
-    ports:
-     - "3000:3000"
     expose:
-     - '3000'
+      - '3000'
     depends_on:
      - db
     environment:
@@ -14,7 +20,7 @@ services:
      - DATABASE_USER=harry
      - DATABASE_PASSWORD=password
     volumes:
-     - ./apiservice/api/public/images:/opt/images
+     - ase-fs:/opt/images
      - ./apiservice/api:/app/api
   db:
     image: mysql:5.7
@@ -30,4 +36,5 @@ services:
       - ase-db:/var/lib/mysql
       - ./database:/docker-entrypoint-initdb.d
 volumes:
+  ase-fs:
   ase-db:
