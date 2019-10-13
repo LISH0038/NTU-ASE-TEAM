@@ -10,11 +10,11 @@ class ItemList extends Component {
     items: {}
   };
 
-  addItemHandler = itemName => {
+  addItemHandler = (itemId, itemName) => {
     this.setState({
       items: {
         ...this.state.items,
-        [+new Date()]: itemName
+        [itemId]: itemName
       }
     });
   };

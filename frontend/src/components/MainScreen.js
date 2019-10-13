@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import Webcam from "react-webcam";
-import popUp from "./Popup";
+import PopUp from "./Popup";
 import Card from '@material-ui/core/Card';
 import "../css/MainScreen.css";
 import ItemList from "./listcomponents/ItemsList/ItemsList";
@@ -27,6 +27,11 @@ const styles = {
   }
 };
 
+//TODO:
+//1. duplicate list items
+//2. stop sending request once time limit reached
+//3. initialize absent list
+//4. send report
 class MainScreen extends Component{
   //API call reference
   // const request = require('request');
@@ -43,26 +48,55 @@ class MainScreen extends Component{
     this.absentList = React.createRef();
     this.presentList = React.createRef();
     this.lateList = React.createRef();
+    this.webcam = React.createRef();
+  }
+  
+  state = {
+    absentList :[],
+    presentList : [],
+    lateList : []
   }
 
   componentDidMount() {
+    // let courseDetails = this.props.location.state.details;
+    // console.log(courseDetails.studentList);
+    // courseDetails.studentList.forEach(s =>{
+    //   this.absentList.current.addItemHandler(s.id,s.name);
+    // });
     this.timerID = setInterval(
       () => this.faceRecognition(),
       5000
     );
   }
 
-  faceRecognition(){
+  faceRecognition= async () => {
+    if (!!this.webcam.current) {
+      await getFullFaceDescription(
+        this.webcam.current.getScreenshot(),
+        480
+      ).then(fullDesc => {
+        if (!!fullDesc) {
+          this.setState({
+            detections: fullDesc.map(fd => fd.detection),
+            descriptors: fullDesc.map(fd => fd.descriptor)
+          });
+        }
+      });
+    }
     var timeStamp = new Date().getTime();
     let mockRes = [{"id": "xxxxxx","name": timeStamp%10, "status":"on-time"}];
     mockRes.forEach(s=>{
-      if (s.status ==="on-time"){
-        this.presentList.current.addItemHandler(s.name);
-        this.absentList.current.onDeleteHandler(s.name);
+      // if (!this.state.presentList.includes(s)){
+
+      // }
+      if (s.status ==="on-time" && !Object.keys(this.presentList.current.state.items).includes(s)){
+        //this.state.presentList.push(s);
+        this.presentList.current.addItemHandler(s.id,s.name);
+        this.absentList.current.onDeleteHandler(s.id);
       }
-      else if (s.status ==="late"){
-        this.lateList.current.addItemHandler(s.name);
-        this.absentList.current.onDeleteHandler(s.name);
+      else if (s.status ==="late" && !Object.keys(this.lateList.current.state.items).includes(s)){
+        this.lateList.current.addItemHandler(s.id, s.name);
+        this.absentList.current.onDeleteHandler(s.id);
       }
     });
   }
@@ -75,7 +109,7 @@ class MainScreen extends Component{
             <Card style={styles.list}>
               <CardContent>
                 <h5>Absent List</h5>
-                <ItemList ref={this.absentList} color="orangered"/>
+                <ItemList ref={this.absentList} initList={this.props.location.state.details.studentList} color="orangered"/>
               </CardContent>
               </Card>
           </Grid>
@@ -84,6 +118,7 @@ class MainScreen extends Component{
               <CardContent>
                 <h1>Main Camera</h1>
                 <Webcam
+                  ref={this.webcam}
                   audio={false}
                   flex={1}
                   width={900}

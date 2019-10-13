@@ -1,25 +1,77 @@
 import React from "react";
 import { Button, FormGroup, Form, Label, Input } from "reactstrap"
-import { Link } from "react-router-dom";
+import { withRouter, Redirect} from "react-router-dom";
 
-function Home() {
-  return (
-    <Form>
-      <h1 className="text-center pt-3 ">  Welcome Teaching Assistant  </h1>
+class Home extends React.Component {
 
-      <FormGroup className="loginForm mt-5 mb-3">
-        <h4 style={{ color: 'white' }}> Enter Course Index</h4>
-        <Label className="mt-5 labelLogin" style={{ color: 'white', fontWeight: 'bold' }}> Course Index</Label>
-        <Input type="index" placeholder="index" className="mt -3" />
-        <Label className="mt-4" style={{ color: 'white', fontWeight: 'bold' }}> Tutorial/Lab Index</Label>
-        <Input type="index#" placeholder="index#" />
-      </FormGroup>
+  state ={
+    index:"10001",
+    details:null,
+    redirect:false
+  };
 
-      <Link to="/mainscreen">
-        <Button className="btn-lg btn-dark btn-block mt-5 btnLogin"> View Attendance</Button>
-      </Link>
-    </Form >
-  );
+  onChangeIndex = (event)=> {
+    this.setState({index: event.target.value});
+  };
+
+  submitAndRedirect = ()=>{
+    // const request = require('request');
+    // request('http://localhost:3000/index/10001', function (error, response, body) {
+    //   console.error('error:', error); // Print the error if one occurred
+    //   console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    //   console.log('body:', body); // Print the HTML for the Google homepage.
+    // });
+    let mockRes = {
+      "index":"10001",
+     "sessionId":"1",
+      "schedule":{"startTime":"152623456123",
+                     "lateTime": "152623456999", 
+                     "endTime": "152623460000"},
+      "studentList": [{"id": "1",
+         "name": "student1",
+          },
+      {"id": "x1x",
+         "name": "student2",
+          },
+      {"id": "xxx",
+         "name": "student3",
+          },
+      {"id": "2xxx",
+        "name": "student4",
+         }]
+     };
+     this.setState({details:mockRes,redirect:true});
+  };
+
+  renderMainscreen = (details)=> {
+    if (this.state.redirect){
+      return <Redirect to={{
+        pathname:"/mainscreen",
+        state:{details: this.state.details},
+      }}></Redirect>;
+    }
+  };
+
+  render(){
+    return (
+      <div>
+        {this.renderMainscreen()}
+      <Form>
+        <h1 className="text-center pt-3 ">  Welcome Teaching Assistant  </h1>
+
+        <FormGroup className="loginForm mt-5 mb-3">
+          <h4 style={{ color: 'white' }}> Enter Course Index</h4>
+          <Label className="mt-5 labelLogin" style={{ color: 'white', fontWeight: 'bold' }}> Course Index</Label>
+          <Input type="index" placeholder="index" className="mt -3" />
+          <Label className="mt-4" style={{ color: 'white', fontWeight: 'bold' }}> Tutorial/Lab Index</Label>
+          <Input type="index#" placeholder="index#" value={this.state.index} onChange={this.onChangeIndex}/>
+        </FormGroup>
+
+        <Button onClick={this.submitAndRedirect} className="btn-lg btn-dark btn-block mt-5 btnLogin"> View Attendance</Button>
+      </Form >
+      </div>
+    );
+  }
 }
 
-export default Home;
+export default withRouter(Home);
