@@ -11,7 +11,8 @@ const env = require(process.env.node_env),
       fs = require('fs-extra'),
       tf = require('@tensorflow/tfjs-node'),
       distanceThreshold = 0.4,
-      MODELS_URL = path.join(__dirname, '/../public/models/');
+      MODELS_URL = path.join(__dirname, '/../public/models/'),
+    base64ToImage = require('base64-to-image');
 
 const regex_folder = RegExp('^[a-zA-Z][0-9]{7}[a-zA-Z]_.*'); // Folder name match in FaceDB
 const regex_id = RegExp('^[a-zA-Z][0-9]{7}[a-zA-Z]'); // Matric id match in FaceDB
@@ -21,8 +22,9 @@ function controller(){
   faceapi.env.monkeyPatch({ Canvas, Image, ImageData, fetch });
 }
 
-// pass in facedescriptors
-controller.prototype.detectFace = async function(recognitionData, detections){
+// used for facial recognition
+controller.prototype.detectFace = async function(recognitionData, imageBase64){
+  console.log("testhere1");
   try{
     await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODELS_URL);
     await faceapi.nets.faceLandmark68Net.loadFromDisk(MODELS_URL);
@@ -30,12 +32,40 @@ controller.prototype.detectFace = async function(recognitionData, detections){
     await faceapi.tf.setBackend('tensorflow');
     const labeledFaceDescriptors = await recogData(recognitionData);
     const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, distanceThreshold);
-    // const img = await canvas.loadImage(env.images+imageName);
-    // const canvas1 = faceapi.createCanvasFromMedia(img);
+    console.log("issue pre11111 loading");
+
+    var data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+    var buf = new Buffer(data, 'base64');
+    var id = '/opt/images/'+ '1' +".jpeg";
+    console.log(id);
+    await fs.writeFile(id, buf,{encoding:'base64'},(err) => {
+      if (err) throw err;
+      console.log("saved");
+    });
+    const img = await canvas.loadImage(id);
+    // console.log(data);
+    // var image = await base64ToImage(data,env.images);
+    // console.log(image);
+    // console.log("TRY TO LOAD IMAGE");
+    // const image = new Image;
+    // image.src = data;
+    // const img = await canvas.loadImage(image);
+    // console.log(img);
+
+
+    // console.log("../public/images/"+image.fileName);
+    // const img = await canvas.loadImage(" /api/public/images/"+image.fileName);
+    // const img = await canvas.loadImage("/opt/"+image.fileName);
+
+    const canvas1 = faceapi.createCanvasFromMedia(img);
+    console.log("issue post loading");
     const displaySize = { width: img.width, height: img.height }
-    // faceapi.matchDimensions(canvas1, displaySize);
-    // const detections = await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
+    faceapi.matchDimensions(canvas1, displaySize);
+    console.log("111");
+    const detections = await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
+    console.log("222");
     const resizedDetections = faceapi.resizeResults(detections, displaySize);
+    console.log("333");
     for(let i=0;i<labeledFaceDescriptors.length;i++){
       for (let j = 0; j < labeledFaceDescriptors[i]._descriptors.length; j++) {
         const dist = faceapi.euclideanDistance(resizedDetections[0].descriptor, labeledFaceDescriptors[i]._descriptors[j]);
@@ -44,21 +74,17 @@ controller.prototype.detectFace = async function(recognitionData, detections){
     }
     const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor));
     const returnedIds = [];
-    const returnedDrawBoxes = [];
 
     results.forEach((result, i) => {
-      const box = resizedDetections[i].detection.box;
-      const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString().split("_")[1]});
+
+      // const box = resizedDetections[i].detection.box;
+      // const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString().split("_")[1]});
       if (regex_id.test(result.toString().split("_")[0])) {
         returnedIds.push(result.toString().split("_")[0]);
       }
-      returnedDrawBoxes.push(drawBox);
       // drawBox.draw(canvas1);
     });
-    // canvas: canvas1.toDataURL(),
-    // return { drawBox: returnedDrawBoxes, image: imageName, recognisedIds: returnedIds};
-
-    return { drawBox: returnedDrawBoxes, recognizedStudentIds: returnedIds};
+    return { canvas: canvas1.toDataURL(), recognizedStudentIds: returnedIds};
   }catch(err){ throw 'Error in controllers/faceDetector.js (detectFace):\n'+err; }
 }
 
