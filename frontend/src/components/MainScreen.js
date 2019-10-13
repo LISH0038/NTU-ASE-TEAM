@@ -72,23 +72,17 @@ class MainScreen extends Component{
 
   faceRecognition= async () => {
     if (!!this.webcam.current) {
-      await getFullFaceDescription(
-        this.webcam.current.getScreenshot(),
-        160
-      ).then(fullDesc => {
-        if (!!fullDesc) {
-          const request = require('request');
-          request.post({
-            headers: {'content-type' : 'application/json'},
-            url:     'http://localhost:3000/recognition',
-            body:    fullDesc
-          },function (error, response, body) {
-            console.error('error:', error); // Print the error if one occurred
-            console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-            console.log('body:', body); // Print the HTML for the Google homepage.
-          });
-        }
-      });
+        let img = this.webcam.current.getScreenshot();
+        const request = require('request');
+        request.post({
+          headers: {'content-type' : 'application/json'},
+          url:     'http://localhost:3000/recognition',
+          body:    {rawImage:img}
+        },function (error, response, body) {
+          console.error('error:', error); // Print the error if one occurred
+          console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+          console.log('body:', body); // Print the HTML for the Google homepage.
+        });
     }
     var timeStamp = new Date().getTime();
     let mockRes = [{"id": "xxxxxx","name": timeStamp%10, "status":"on-time"}];
