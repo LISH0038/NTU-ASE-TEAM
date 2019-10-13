@@ -46,13 +46,26 @@ INSERT INTO class (class_index, late_time, absent_time) VALUES
   (10005, 15, 30);
 
 INSERT INTO student (student_id, student_name, email) VALUES
-  ('U0000001J', 'Harry Cao', 'harry@e.ntu.edu.sg'),
-  ('U0000002J', 'Zeng Jinpo', 'zeng@e.ntu.edu.sg');
+  ('U1620058E', 'Harry Cao', 'harry@e.ntu.edu.sg'),
+  ('U1620575J', 'Zeng Jinpo', 'zeng@e.ntu.edu.sg'),
+  ('U1721882B','Rajasekara Pandian Akshaya Muthu','akshaya@e.ntu.edu.sg'),
+  ('U1721642E','MN Shaanmugam','shaan@e.ntu.edu.sg'),
+  ('U1622186B','Li Shanlan','shanlan@e.ntu.edu.sg'),
+  ('N1902163K','Simon El Nahas Christensen','simon@e.ntu.edu.sg');
 
 INSERT INTO student_class (class_index, student_id) VALUES
-  (10001, 'U0000001J'),
-  (10001, 'U0000002J'),
-  (10002, 'U0000002J');
+  (10001, 'U1620058E'),
+  (10001, 'U1620575J'),
+  (10001,'U1721882B'),
+  (10001,'U1721642E'),
+  (10001,'U1622186B'),
+  (10001,'N1902163K'),
+  (10002, 'U1620058E'),
+  (10002, 'U1620575J'),
+  (10002,'U1721882B'),
+  (10002,'U1721642E'),
+  (10002,'U1622186B'),
+  (10002,'N1902163K');
 
 INSERT INTO class_session (class_index, session_id, start_time) VALUES
   (10001, 1, 1570176000),
@@ -60,11 +73,24 @@ INSERT INTO class_session (class_index, session_id, start_time) VALUES
   (10002, 3, 1570574000);
 
 INSERT INTO report (session_id, student_id, arrival_time, attend_status) VALUES
-  (1, 'U0000001J', 1570176000, 'on-time'),
-  (1, 'U0000002J', NULL, 'absent'),
-  (2, 'U0000001J', 1570375934, 'late'),
-  (2, 'U0000002J', NULL, 'absent'),
-  (3, 'U0000002J', NULL, 'absent');
+  (1, 'U1620058E',NULL, 'absent'),
+  (1, 'U1620575J', NULL, 'absent'),
+  (1, 'U1721882B', NULL, 'absent'),
+  (1, 'U1721642E', NULL, 'absent'),
+  (1, 'U1622186B', NULL, 'absent'),
+  (1, 'N1902163K', NULL, 'absent'),
+  (2, 'U1620058E',NULL, 'absent'),
+  (2, 'U1620575J', NULL, 'absent'),
+  (2, 'U1721882B', NULL, 'absent'),
+  (2, 'U1721642E', NULL, 'absent'),
+  (2, 'U1622186B', NULL, 'absent'),
+  (2, 'N1902163K', NULL, 'absent'),
+  (3, 'U1620058E',NULL, 'absent'),
+  (3, 'U1620575J', NULL, 'absent'),
+  (3, 'U1721882B', NULL, 'absent'),
+  (3, 'U1721642E', NULL, 'absent'),
+  (3, 'U1622186B', NULL, 'absent'),
+  (3, 'N1902163K', NULL, 'absent');
 
 /* class functions*/
 DROP PROCEDURE IF EXISTS get_class;
@@ -94,7 +120,11 @@ DROP PROCEDURE IF EXISTS get_student_in_class;
 DELIMITER //
 CREATE PROCEDURE get_student_in_class(IN class_index INT)
   BEGIN
-    SELECT student_id FROM student_class WHERE student_class.class_index = class_index;
+    SELECT student.student_id, student.student_name
+    FROM student_class
+    INNER JOIN student ON student_class.student_id = student.student_id
+     WHERE student_class.class_index = class_index;
+
   END //
 DELIMITER ;
 

@@ -15,6 +15,7 @@ router.post('/', function(req, res, next) {
     if (err) return res.status(500).send('Error when retrieving the session');
     if (rows[0].length == 0) return res.status(404).send('The session id was not found');
     rows[0].forEach(row => absentStudents.push(row.student_id));
+    console.log(absentStudents);
 
     pool.query('CALL get_class_start_late_absent_time(?)',[req.body.sessionId],async function (err,rows,fields) {
       if (err) return res.status(500).send('Error when retrieving the session');
@@ -74,16 +75,6 @@ async function getRecognisedIds(imageBase64){
   data.forEach(d => {
     const obj = {label: d.label};
     let array = [];
-    // var absent = false;
-    // for (let i = 0; i < absentList.length; i++){
-    //   if (d.label.includes(absentList[i],0)){
-    //     absent = true;
-    //     break;
-    //   }
-    // }
-    // if (absent) {
-    //
-    // }
     d.descriptors.forEach(descriptor => {
       const dat = new Float32Array(descriptor);
       array.push(dat);

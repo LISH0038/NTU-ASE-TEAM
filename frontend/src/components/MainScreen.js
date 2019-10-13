@@ -39,7 +39,7 @@ class MainScreen extends Component{
     this.lateList = React.createRef();
     this.webcam = React.createRef();
   }
-  
+
   state = {
     absentList :[],
     presentList : [],
@@ -51,7 +51,7 @@ class MainScreen extends Component{
     console.log(courseDetails.studentList);
     let tmp={};
     courseDetails.studentList.forEach(s =>{
-      tmp[s.id]=s.name;
+      tmp[s.student_id]=s.name;
     });
     console.log(tmp);
     this.absentList.current.setState({items:tmp});
@@ -73,7 +73,7 @@ class MainScreen extends Component{
           console.error('error:', error); // Print the error if one occurred
           console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
           console.log('body:', body); // Print the HTML for the Google homepage.
-          body.recognizedStudentIds.forEach(s=>{
+          JSON.parse(body).recognizedStudentIds.forEach(s=>{
             if (s.status ==="on-time" && !Object.keys(this.presentList.current.state.items).includes(s)){
               //this.state.presentList.push(s);
               this.presentList.current.addItemHandler(s.id,s.name);
@@ -161,10 +161,10 @@ class MainScreen extends Component{
               </Popup>
             </div>
           </Grid>
-        </Grid>     
+        </Grid>
       </div>
     );
-  }  
+  }
 }
 
 export default MainScreen;

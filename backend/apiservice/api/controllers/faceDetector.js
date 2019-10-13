@@ -34,30 +34,36 @@ controller.prototype.detectFace = async function(recognitionData, imageBase64){
     const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, distanceThreshold);
     console.log("issue pre11111 loading");
 
-    var data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
-    var buf = new Buffer(data, 'base64');
-    var id = '/opt/images/'+ '1' +".jpeg";
-    console.log(id);
-    await fs.writeFile(id, buf,{encoding:'base64'},(err) => {
-      if (err) throw err;
-      console.log("saved");
-    });
+    // var data = await imageBase64.replace(/^data:image\/\w+;base64,/, "");
+    // //var buf = await new Buffer(data, 'base64');
+    // var id = await env.images + '1.png';
+    //TODO: solve problems with saving image
+    var id=env.images+"Akshaya.JPG";
+    // await fs.writeFile(id, data,{encoding:'base64'},(err) => {
+    //   if (err) throw err;
+    //   console.log("saved");
+    // }).then(() => {
+    //   const canvas1 = faceapi.createCanvasFromMedia(id);
+    //   console.log("haha");
+    // });
     const img = await canvas.loadImage(id);
-    // console.log(data);
-    // var image = await base64ToImage(data,env.images);
-    // console.log(image);
-    // console.log("TRY TO LOAD IMAGE");
-    // const image = new Image;
-    // image.src = data;
-    // const img = await canvas.loadImage(image);
-    // console.log(img);
-
-
-    // console.log("../public/images/"+image.fileName);
-    // const img = await canvas.loadImage(" /api/public/images/"+image.fileName);
-    // const img = await canvas.loadImage("/opt/"+image.fileName);
-
     const canvas1 = faceapi.createCanvasFromMedia(img);
+    console.log("lzter");
+
+    // var image = await base64ToImage(imageBase64,'/opt/images/');
+    // console.log('saved');
+
+    // let base64Image = imageBase64.split(';base64,').pop();
+    // fs.writeFile('/public/images/1.png', base64Image, {encoding: 'base64'}, function(err) {
+    //   console.log('File created');
+    // });
+
+    // const img = await canvas.loadImage(id);
+    // fetch image to api\
+    // console.log(blob);
+    // let img = await faceapi.fetchImage(blob);
+
+
     console.log("issue post loading");
     const displaySize = { width: img.width, height: img.height }
     faceapi.matchDimensions(canvas1, displaySize);

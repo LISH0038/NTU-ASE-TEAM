@@ -20,13 +20,13 @@ class Home extends React.Component {
       console.error('error:', error); // Print the error if one occurred
       console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
       console.log('body:', body); // Print the HTML for the Google homepage.
-      this.setState({details:body,redirect:true});
+      this.setState({details:JSON.parse(body),redirect:true});
     });
     // let mockRes = {
     //   "index":"10001",
     //  "sessionId":"1",
     //   "schedule":{"startTime":"152623456123",
-    //                  "lateTime": "152623456999", 
+    //                  "lateTime": "152623456999",
     //                  "endTime": "152623460000"},
     //   "studentList": [{"id": "1",
     //      "name": "student1",
