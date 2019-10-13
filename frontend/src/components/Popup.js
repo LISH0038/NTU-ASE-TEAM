@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
-
-import Webcam from "react-webcam";
+import React, { useState } from 'react';
+import { Modal } from "react";
+import { Button } from "react";
+import { render } from "react";
 
 let popupStyles = {
     width: '1500px',
@@ -38,20 +39,7 @@ let webcamStyle = {
 }
 
 
-function popUp() {
-    return (
-        <div style={popupStyles}>
-            <h1> Please rotate your face!</h1>
-            <Webcam style={webcamStyle}
-                width={800}
-                height={600}
-            />
-            <button style={popupButtonStyle}>Done!</button>
-        </div >
-    )
-}
 
-export default popUp;
 
 /*
 

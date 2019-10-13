@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import Webcam from "react-webcam";
-import popUp from "./Popup";
+import Popup from 'reactjs-popup';
 import ListItem from '@material-ui/core/ListItem';
 import List from '@material-ui/core/List';
 import ListItemText from '@material-ui/core/ListItemText';
 import "../css/MainScreen.css";
+
 
 
 function MainScreen() {
@@ -15,16 +16,15 @@ function MainScreen() {
     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
     console.log('body:', body); // Print the HTML for the Google homepage.
   });
-  
+
   const expectedStudents = ["expectedStudent1", "expectedStudent2", "expectedStudent3"] // references to components
   const recognizedStudents = ["recognizedStudent1", "recognizedStudent2", "recognizedStudent3"]
-
 
 
   return (
     <div>
       <div id="leftbox" >
-        <h1>Absent List</h1>
+        <h1 >Absent List</h1>
         <List>
           {expectedStudents.map((comp, index) =>
             <ListItem>
@@ -36,7 +36,7 @@ function MainScreen() {
       </div>
 
       <div id="middlebox" style={{ textAlign: "center" }}>
-        <h1>Main Camera</h1>
+        <h1>Webcam</h1>
         <br></br>
         <Webcam
           audio={false}
@@ -64,7 +64,7 @@ function MainScreen() {
           <h1>Late List</h1>
           <List>
             {recognizedStudents.map((comp, index) =>
-              <ListItem>
+              <ListItem style={{ color: 'black' }}>
                 <ListItemText primary={index + 1 + '. ' + comp} />
               </ListItem>
             )
@@ -72,11 +72,37 @@ function MainScreen() {
           </List>
         </div>
 
-        <div>
-          <button onClick={popUp.bind} > Unrecognised / Register</button>
+
+        <div className="App">
+
+          <Popup modal trigger={<button className=" btn-lg  btn-block " style={{
+            background: 'rgb(22, 77, 124)', fontSize: '23px'
+          }}>Unrecognised?</button>}>
+            <br></br>
+            <div>
+              <h3>Plesae rotate your head</h3>
+              <Webcam>
+                flex={1}
+                audio = {false}
+                width={300}
+                height={200}
+                screenshotFormat={"image/jpeg"}
+              </Webcam>
+            </div>
+          </Popup>
         </div>
+
+
+
+
+
+
+
+
+
+
       </div>
-    </div>
+    </div >
   );
 }
 
