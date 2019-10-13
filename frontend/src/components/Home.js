@@ -54,22 +54,27 @@ class Home extends React.Component {
 
   render(){
     return (
-      <div>
-        {this.renderMainscreen()}
       <Form>
-        <h1 className="text-center pt-3 ">  Welcome Teaching Assistant  </h1>
+        <h1 className="text-center pt-3 " style={{ color: 'black' }}>  Welcome Teaching Assistant  </h1>
 
         <FormGroup className="loginForm mt-5 mb-3">
-          <h4 style={{ color: 'white' }}> Enter Course Index</h4>
-          <Label className="mt-5 labelLogin" style={{ color: 'white', fontWeight: 'bold' }}> Course Index</Label>
-          <Input type="index" placeholder="index" className="mt -3" />
-          <Label className="mt-4" style={{ color: 'white', fontWeight: 'bold' }}> Tutorial/Lab Index</Label>
-          <Input type="index#" placeholder="index#" value={this.state.index} onChange={this.onChangeIndex}/>
+          <h4 className="mt-2" style={{ color: 'white', fontSize: '25px', fontWeight: 'bold' }}> Enter Course Index</h4>
+          <Label className="mt-5 labelLogin" style={{ color: 'white', fontSize: '23px' }}> Course Index</Label>
+          <Input type="index" placeholder="index" className="mt -3" style={{ fontSize: '23px' }} />
+          <Label className="mt-4" style={{ color: 'white', fontSize: '23px' }}> Tutorial/Lab Index</Label>
+          <Input type="index" placeholder="index#" style={{ fontSize: '23px' }} value={this.state.index} onChange={this.onChangeIndex}/>
         </FormGroup>
 
-        <Button onClick={this.submitAndRedirect} className="btn-lg btn-dark btn-block mt-5 btnLogin"> View Attendance</Button>
+        <Link to="/mainscreen">
+          <Button className=" btn-lg  btn-block " onClick={this.submitAndRedirect} style={{
+            background: 'rgb(22, 77, 124)',
+            width: '407px',
+            position: 'absolute', left: '50%', top: '70%',
+            transform: 'translate(-50%, -50%)',
+            fontSize: '23px'
+          }}> View Attendance</Button>
+        </Link>
       </Form >
-      </div>
     );
   }
 }

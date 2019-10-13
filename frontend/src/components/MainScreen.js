@@ -1,6 +1,6 @@
+import Popup from 'reactjs-popup';
 import React, {Component} from "react";
 import Webcam from "react-webcam";
-import PopUp from "./Popup";
 import Card from '@material-ui/core/Card';
 import "../css/MainScreen.css";
 import ItemList from "./listcomponents/ItemsList/ItemsList";
