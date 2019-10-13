@@ -15,32 +15,32 @@ class Home extends React.Component {
   };
 
   submitAndRedirect = ()=>{
-    // const request = require('request');
-    // request('http://localhost:3000/index/10001', function (error, response, body) {
-    //   console.error('error:', error); // Print the error if one occurred
-    //   console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    //   console.log('body:', body); // Print the HTML for the Google homepage.
-    // });
-    let mockRes = {
-      "index":"10001",
-     "sessionId":"1",
-      "schedule":{"startTime":"152623456123",
-                     "lateTime": "152623456999", 
-                     "endTime": "152623460000"},
-      "studentList": [{"id": "1",
-         "name": "student1",
-          },
-      {"id": "x1x",
-         "name": "student2",
-          },
-      {"id": "xxx",
-         "name": "student3",
-          },
-      {"id": "2xxx",
-        "name": "student4",
-         }]
-     };
-     this.setState({details:mockRes,redirect:true});
+    const request = require('request');
+    request('http://localhost:3000/index/'+this.state.index, function (error, response, body) {
+      console.error('error:', error); // Print the error if one occurred
+      console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+      console.log('body:', body); // Print the HTML for the Google homepage.
+      this.setState({details:body,redirect:true});
+    });
+    // let mockRes = {
+    //   "index":"10001",
+    //  "sessionId":"1",
+    //   "schedule":{"startTime":"152623456123",
+    //                  "lateTime": "152623456999", 
+    //                  "endTime": "152623460000"},
+    //   "studentList": [{"id": "1",
+    //      "name": "student1",
+    //       },
+    //   {"id": "x1x",
+    //      "name": "student2",
+    //       },
+    //   {"id": "xxx",
+    //      "name": "student3",
+    //       },
+    //   {"id": "2xxx",
+    //     "name": "student4",
+    //      }]
+    //  };
   };
 
   renderMainscreen = (details)=> {

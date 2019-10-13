@@ -6,7 +6,6 @@ import "../css/MainScreen.css";
 import ItemList from "./listcomponents/ItemsList/ItemsList";
 import Grid from '@material-ui/core/Grid';
 import { CardContent } from "@material-ui/core";
-import {getFullFaceDescription} from '../api/face';
 
 const styles = {
   root: {
@@ -29,21 +28,10 @@ const styles = {
 };
 
 //TODO:
-//1. duplicate list items
 //2. stop sending request once time limit reached
-//3. initialize absent list
 //4. send report
 class MainScreen extends Component{
-  //API call reference
-  // const request = require('request');
-  // request('http://localhost:3000/index/10001', function (error, response, body) {
-  //   console.error('error:', error); // Print the error if one occurred
-  //   console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-  //   console.log('body:', body); // Print the HTML for the Google homepage.
-  // });
-  
-  // const expectedStudents = ["expectedStudent1", "expectedStudent2", "expectedStudent3"] // references to components
-  // const recognizedStudents = ["recognizedStudent1", "recognizedStudent2", "recognizedStudent3"]
+
   constructor(){
     super();
     this.absentList = React.createRef();
@@ -59,11 +47,14 @@ class MainScreen extends Component{
   }
 
   componentDidMount() {
-    // let courseDetails = this.props.location.state.details;
-    // console.log(courseDetails.studentList);
-    // courseDetails.studentList.forEach(s =>{
-    //   this.absentList.current.addItemHandler(s.id,s.name);
-    // });
+    let courseDetails = this.props.location.state.details;
+    console.log(courseDetails.studentList);
+    let tmp={};
+    courseDetails.studentList.forEach(s =>{
+      tmp[s.id]=s.name;
+    });
+    console.log(tmp);
+    this.absentList.current.setState({items:tmp});
     this.timerID = setInterval(
       () => this.faceRecognition(),
       5000
@@ -82,24 +73,35 @@ class MainScreen extends Component{
           console.error('error:', error); // Print the error if one occurred
           console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
           console.log('body:', body); // Print the HTML for the Google homepage.
+          body.recognizedStudentIds.forEach(s=>{
+            if (s.status ==="on-time" && !Object.keys(this.presentList.current.state.items).includes(s)){
+              //this.state.presentList.push(s);
+              this.presentList.current.addItemHandler(s.id,s.name);
+              this.absentList.current.onDeleteHandler(s.id);
+            }
+            else if (s.status ==="late" && !Object.keys(this.lateList.current.state.items).includes(s)){
+              this.lateList.current.addItemHandler(s.id, s.name);
+              this.absentList.current.onDeleteHandler(s.id);
+            }
+          });
         });
     }
-    var timeStamp = new Date().getTime();
-    let mockRes = [{"id": "xxxxxx","name": timeStamp%10, "status":"on-time"}];
-    mockRes.forEach(s=>{
-      // if (!this.state.presentList.includes(s)){
+    // var timeStamp = new Date().getTime();
+    // let mockRes = [{"id": timeStamp%10+1,"name": timeStamp%10, "status":"on-time"}];
+    // mockRes.forEach(s=>{
+    //   // if (!this.state.presentList.includes(s)){
 
-      // }
-      if (s.status ==="on-time" && !Object.keys(this.presentList.current.state.items).includes(s)){
-        //this.state.presentList.push(s);
-        this.presentList.current.addItemHandler(s.id,s.name);
-        this.absentList.current.onDeleteHandler(s.id);
-      }
-      else if (s.status ==="late" && !Object.keys(this.lateList.current.state.items).includes(s)){
-        this.lateList.current.addItemHandler(s.id, s.name);
-        this.absentList.current.onDeleteHandler(s.id);
-      }
-    });
+    //   // }
+    //   if (s.status ==="on-time" && !Object.keys(this.presentList.current.state.items).includes(s)){
+    //     //this.state.presentList.push(s);
+    //     this.presentList.current.addItemHandler(s.id,s.name);
+    //     this.absentList.current.onDeleteHandler(s.id);
+    //   }
+    //   else if (s.status ==="late" && !Object.keys(this.lateList.current.state.items).includes(s)){
+    //     this.lateList.current.addItemHandler(s.id, s.name);
+    //     this.absentList.current.onDeleteHandler(s.id);
+    //   }
+    // });
   }
 
   render(){
