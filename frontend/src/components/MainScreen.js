@@ -143,6 +143,23 @@ class MainScreen extends Component{
                 <ItemList ref={this.lateList} color="orange"/>
               </CardContent>
             </Card>
+            <div className="App">
+              <Popup modal trigger={<button className=" btn-lg  btn-block " style={{
+                background: 'rgb(22, 77, 124)', fontSize: '23px'
+              }}>Unrecognised?</button>}>
+                <br></br>
+                <div>
+                  <h3>Plesae rotate your head</h3>
+                  <Webcam>
+                    flex={1}
+                    audio = {false}
+                    width={300}
+                    height={200}
+                    screenshotFormat={"image/jpeg"}
+                  </Webcam>
+                </div>
+              </Popup>
+            </div>
           </Grid>
         </Grid>     
       </div>

@@ -16,7 +16,7 @@ class Home extends React.Component {
 
   submitAndRedirect = ()=>{
     const request = require('request');
-    request('http://localhost:3000/index/'+this.state.index, function (error, response, body) {
+    request('http://localhost:3000/index/'+ this.state.index, (error, response, body) =>{
       console.error('error:', error); // Print the error if one occurred
       console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
       console.log('body:', body); // Print the HTML for the Google homepage.
@@ -54,6 +54,8 @@ class Home extends React.Component {
 
   render(){
     return (
+      <div>
+      {this.renderMainscreen()}
       <Form>
         <h1 className="text-center pt-3 " style={{ color: 'black' }}>  Welcome Teaching Assistant  </h1>
 
@@ -64,17 +66,15 @@ class Home extends React.Component {
           <Label className="mt-4" style={{ color: 'white', fontSize: '23px' }}> Tutorial/Lab Index</Label>
           <Input type="index" placeholder="index#" style={{ fontSize: '23px' }} value={this.state.index} onChange={this.onChangeIndex}/>
         </FormGroup>
-
-        <Link to="/mainscreen">
-          <Button className=" btn-lg  btn-block " onClick={this.submitAndRedirect} style={{
+        <Button className=" btn-lg  btn-block " onClick={this.submitAndRedirect} style={{
             background: 'rgb(22, 77, 124)',
             width: '407px',
             position: 'absolute', left: '50%', top: '70%',
             transform: 'translate(-50%, -50%)',
             fontSize: '23px'
           }}> View Attendance</Button>
-        </Link>
       </Form >
+      </div>
     );
   }
 }
