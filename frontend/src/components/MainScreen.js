@@ -6,6 +6,7 @@ import "../css/MainScreen.css";
 import ItemList from "./listcomponents/ItemsList/ItemsList";
 import Grid from '@material-ui/core/Grid';
 import { CardContent } from "@material-ui/core";
+import {getFullFaceDescription} from '../api/face';
 
 const styles = {
   root: {
@@ -73,12 +74,18 @@ class MainScreen extends Component{
     if (!!this.webcam.current) {
       await getFullFaceDescription(
         this.webcam.current.getScreenshot(),
-        480
+        160
       ).then(fullDesc => {
         if (!!fullDesc) {
-          this.setState({
-            detections: fullDesc.map(fd => fd.detection),
-            descriptors: fullDesc.map(fd => fd.descriptor)
+          const request = require('request');
+          request.post({
+            headers: {'content-type' : 'application/json'},
+            url:     'http://localhost:3000/recognition',
+            body:    fullDesc
+          },function (error, response, body) {
+            console.error('error:', error); // Print the error if one occurred
+            console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+            console.log('body:', body); // Print the HTML for the Google homepage.
           });
         }
       });
