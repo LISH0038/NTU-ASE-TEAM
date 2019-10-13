@@ -16,7 +16,7 @@ function MainScreen() {
     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
     console.log('body:', body); // Print the HTML for the Google homepage.
   });
-  
+
   const expectedStudents = ["expectedStudent1", "expectedStudent2", "expectedStudent3"] // references to components
   const recognizedStudents = ["recognizedStudent1", "recognizedStudent2", "recognizedStudent3"]
 
@@ -75,7 +75,9 @@ function MainScreen() {
 
         <div className="App">
 
-          <Popup modal trigger={<button>Click Me</button>}>
+          <Popup modal trigger={<button className=" btn-lg  btn-block " style={{
+            background: 'rgb(22, 77, 124)', fontSize: '23px'
+          }}>Unrecognised?</button>}>
             <br></br>
             <div>
               <h3>Plesae rotate your head</h3>
