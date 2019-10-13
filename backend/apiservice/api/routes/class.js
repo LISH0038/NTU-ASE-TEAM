@@ -3,6 +3,8 @@ const router = express.Router();
 const pool = require('../db/pool');
 const Joi = require('joi');
 
+
+
 /* GET home page. */
 router.get('/:classId', function(req, res, next) {
   // 400 Bad Request for wrong class index

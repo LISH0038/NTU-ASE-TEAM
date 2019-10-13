@@ -1,7 +1,11 @@
-var express = require('express');
-var router = express.Router();
-var pool = require('../db/pool');
-var getStudentStatus = require('../utility/getStudentStatus');
+const express = require('express'),
+    router = express.Router(),
+    pool = require('../db/pool');
+    env = require(process.env.node_env),
+    jsonfile = require('jsonfile'),
+    fs = require('fs-extra'),
+    controller = require('../controllers/faceDetector.js'),
+    getStudentStatus = require('../utility/getStudentStatus');
 
 router.post('/', function(req, res, next) {
   var absentStudents = [];
@@ -23,38 +27,79 @@ router.post('/', function(req, res, next) {
       // const current_time = Math.floor(Date.now()/1000);
       const current_time = 1570176001;
 
-      const recognizedStudentIds = getRecognisedIds(req.body.image,absentStudents);
-      console.log("recognized: "+ recognizedStudentIds);
-      for (let i=0; i< recognizedStudentIds.length; i++){
-        var studentId = recognizedStudentIds[i];
-        pool.query('CALL get_student(?)',[studentId],function (err,rows,fields) {
-          var studentName = rows[0][0].student_name;
-          var status = getStudentStatus(current_time, session_start_time, session_late_time, session_absent_time);
-          // returned list
-          recognizedStudentList.push({
-            id: studentId,
-            name: studentName,
-            status: status
+      // const returnedJsonImage = getRecognisedIds(req.body.image,absentStudents);
+      const returnedJsonRecognized = getRecognisedIds([req.body.genFaceDescriptor]);
+      // const recognizedStudentIds = returnedJsonRecognized.recognizedStudentIds;
+      console.log("recognized: "+ returnedJsonRecognized.recognizedStudentIds);
+      for (let i=0; i< returnedJsonRecognized.recognizedStudentIds.length; i++) {
+        var studentId = returnedJsonRecognized.recognizedStudentIds[i];
+        if (!!absentStudents.includes(studentId)) {
+          pool.query('CALL get_student(?)', [studentId], function (err, rows, fields) {
+            var studentName = rows[0][0].student_name;
+            var status = getStudentStatus(current_time, session_start_time, session_late_time, session_absent_time);
+            // returned list
+            recognizedStudentList.push({
+              id: studentId,
+              name: studentName,
+              status: status
+            });
+
+            // todo: check update database
+            pool.query('CALL update_student_status(?,?,?,?)', [req.body.sessionId, studentId, status, current_time]);
+            console.log("session: " + req.body.sessionId + "; studentId: " + studentId + "; status: " + status + "; cur_time: " + current_time);
+
+            // return
+            if (i == returnedJsonRecognized.recognizedStudentIds.length - 1) {
+              console.log(recognizedStudentList);
+              return res.status(200).json({
+                drawBox: returnedJsonRecognized.drawBox,
+                recognizedIds: recognizedStudentList
+              });
+            }
           });
-
-          if (i == recognizedStudentIds.length-1){
-            console.log(recognizedStudentList);
-            return res.status(200).json(recognizedStudentList);
-          }
-
-          // todo: check update database
-          pool.query('CALL update_student_status(?,?,?,?)',[req.body.sessionId,studentId,status,current_time]);
-          console.log("session: " + req.body.sessionId + "; studentId: " + studentId + "; status: "+status+"; cur_time: " + current_time);
-        });
+        }
       }
     });
   });
 
 });
 
-function getRecognisedIds(image,possible_students){
-  //todo: Simon recognition, return list of student IDs
-  return ["U0000001J","U0000002J"];
+// test with local image
+function getRecognisedIds(faceDescriptor){
+  const cont = new controller();
+  const labeledDescriptor = [];
+  // const absentList = ['U0000004J'];
+  const data = jsonfile.readFileSync(env.recData);
+  // only look for reference students in the absent list
+  data.forEach(d => {
+    const obj = {label: d.label};
+    let array = [];
+    // var absent = false;
+    // for (let i = 0; i < absentList.length; i++){
+    //   if (d.label.includes(absentList[i],0)){
+    //     absent = true;
+    //     break;
+    //   }
+    // }
+    // if (absent) {
+    //
+    // }
+    d.descriptors.forEach(descriptor => {
+      const dat = new Float32Array(descriptor);
+      array.push(dat);
+    });
+    obj.descriptors = array;
+    labeledDescriptor.push(obj);
+  });
+
+  cont.detectFace(labeledDescriptor, faceDescriptor).then(function(data){
+    // const image = '/images/'+data.image;
+    return {
+      // box: data.canvas,
+      box:data.drawBox,
+      recognizedStudentIds: data.recognizedStudentIds
+    };
+  });
 }
 
 module.exports = router;

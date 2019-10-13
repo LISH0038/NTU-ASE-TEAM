@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var pool = require('../db/pool');
 
+
 /* Register new photos. */
 router.post('/', function(req, res, next) {
   pool.query('CALL get_class_start_late_absent_time(?)',[req.body.sessionId],function (err,rows,fields){
