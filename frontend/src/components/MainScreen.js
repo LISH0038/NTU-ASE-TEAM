@@ -63,7 +63,7 @@ class MainScreen extends Component{
       },
     ];
   }
-  
+
   state = {
     wait:false,
     success:false,
@@ -74,7 +74,7 @@ class MainScreen extends Component{
     console.log(courseDetails.studentList);
     let tmp={};
     courseDetails.studentList.forEach(s =>{
-      tmp[s.id]=s.name;
+      tmp[s.student_id]=s.name;
     });
     console.log(tmp);
     this.absentList.current.setState({items:tmp});
@@ -203,10 +203,10 @@ class MainScreen extends Component{
               </Popup>
             </div>
           </Grid>
-        </Grid>     
+        </Grid>
       </div>
     );
-  }  
+  }
 }
 
 export default MainScreen;

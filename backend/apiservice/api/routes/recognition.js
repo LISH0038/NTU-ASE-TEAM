@@ -15,8 +15,9 @@ router.post('/', function(req, res, next) {
     if (err) return res.status(500).send('Error when retrieving the session');
     if (rows[0].length == 0) return res.status(404).send('The session id was not found');
     rows[0].forEach(row => absentStudents.push(row.student_id));
+    console.log(absentStudents);
 
-    pool.query('CALL get_class_start_late_absent_time(?)',[req.body.sessionId],function (err,rows,fields) {
+    pool.query('CALL get_class_start_late_absent_time(?)',[req.body.sessionId],async function (err,rows,fields) {
       if (err) return res.status(500).send('Error when retrieving the session');
       if (rows[0].length == 0) return res.status(404).send('The session id was not found');
       var session_start_time = rows[0][0].start_time;
@@ -27,9 +28,8 @@ router.post('/', function(req, res, next) {
       // const current_time = Math.floor(Date.now()/1000);
       const current_time = 1570176001;
 
-      // const returnedJsonImage = getRecognisedIds(req.body.image,absentStudents);
-      const returnedJsonRecognized = getRecognisedIds([req.body.genFaceDescriptor]);
-      // const recognizedStudentIds = returnedJsonRecognized.recognizedStudentIds;
+      const returnedJsonRecognized = await getRecognisedIds(req.body.imageName);
+      console.log("it's here.");
       console.log("recognized: "+ returnedJsonRecognized.recognizedStudentIds);
       for (let i=0; i< returnedJsonRecognized.recognizedStudentIds.length; i++) {
         var studentId = returnedJsonRecognized.recognizedStudentIds[i];
@@ -52,8 +52,9 @@ router.post('/', function(req, res, next) {
             if (i == returnedJsonRecognized.recognizedStudentIds.length - 1) {
               console.log(recognizedStudentList);
               return res.status(200).json({
-                drawBox: returnedJsonRecognized.drawBox,
-                recognizedIds: recognizedStudentList
+                box: returnedJsonRecognized.box,
+                // imageName: returnedJsonRecognized.imageName,
+                recognizedStudentIds: recognizedStudentList
               });
             }
           });
@@ -65,7 +66,7 @@ router.post('/', function(req, res, next) {
 });
 
 // test with local image
-function getRecognisedIds(faceDescriptor){
+async function getRecognisedIds(imageBase64){
   const cont = new controller();
   const labeledDescriptor = [];
   // const absentList = ['U0000004J'];
@@ -74,16 +75,6 @@ function getRecognisedIds(faceDescriptor){
   data.forEach(d => {
     const obj = {label: d.label};
     let array = [];
-    // var absent = false;
-    // for (let i = 0; i < absentList.length; i++){
-    //   if (d.label.includes(absentList[i],0)){
-    //     absent = true;
-    //     break;
-    //   }
-    // }
-    // if (absent) {
-    //
-    // }
     d.descriptors.forEach(descriptor => {
       const dat = new Float32Array(descriptor);
       array.push(dat);
@@ -92,11 +83,13 @@ function getRecognisedIds(faceDescriptor){
     labeledDescriptor.push(obj);
   });
 
-  cont.detectFace(labeledDescriptor, faceDescriptor).then(function(data){
+  console.log("testhere");
+
+  await cont.detectFace(labeledDescriptor, imageBase64).then(function(data){
     // const image = '/images/'+data.image;
     return {
       // box: data.canvas,
-      box:data.drawBox,
+      // imageName: data.imageName,
       recognizedStudentIds: data.recognizedStudentIds
     };
   });

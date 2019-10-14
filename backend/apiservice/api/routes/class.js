@@ -30,19 +30,27 @@ router.get('/:classId', function(req, res, next) {
       const session_absent_time = session_start_time + course.absent_time*60;
 
       pool.query('CALL get_student_in_class(?)', [req.params.classId], function (err, rows, fields) {
-        if (err) return res.status(500).send('Error when retriving student');
+        if (err) return res.status(500).send('Error when retrieving student');
         const students = rows[0];
-
-        return res.status(200).send({
-          "index": course.class_index,
-          "sessionId": session.session_id,
-          "schedule": {
-            "startTime": session_start_time,
-            "lateTime": session_late_time,
-            "endTime": session_absent_time
-          },
-          "studentList": students
-        });
+        studentList = []
+        for (let i = 0; i<students.length; i ++) {
+          studentList.push({
+            id: students[i].student_id,
+            name: students[i].student_name
+          });
+          if (i==students.length-1) {
+            return res.status(200).send({
+              "index": course.class_index,
+              "sessionId": session.session_id,
+              "schedule": {
+                "startTime": session_start_time,
+                "lateTime": session_late_time,
+                "endTime": session_absent_time
+              },
+              "studentList": studentList
+            });
+          }
+        }
       });
     });
   });

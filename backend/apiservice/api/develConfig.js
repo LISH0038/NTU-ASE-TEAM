@@ -2,7 +2,7 @@ module.exports = {
 
   /* Basic Config */
   status: "devel",
-  port: "3000",
+  // port: "3000",
   models: __dirname+'/public/models',
 
   /* FaceDetector Config */
