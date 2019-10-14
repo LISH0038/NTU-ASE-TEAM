@@ -19,11 +19,9 @@ const styles = {
   list: {
     margin: "20px",
     width: "80%",
-    "background-color": "lightyellow",
   },
   mainCamera: {
     margin: "20px",
-    "background-color": "lightyellow",
   }
 };
 
@@ -38,12 +36,37 @@ class MainScreen extends Component{
     this.presentList = React.createRef();
     this.lateList = React.createRef();
     this.webcam = React.createRef();
+    this.mockRes = [
+      {
+          "id": "U1721882B",
+          "name": "Rajasekara Pandian Akshaya Muthu"
+      },
+      {
+        "id": "N1902163K",
+        "name": "Simon El Nahas Christensen"
+      },
+      {
+          "id": "U1721642E",
+          "name": "MN Shaanmugam"
+      },
+      {
+        "id": "U1620058E",
+        "name": "Harry Cao"
+      },
+      {
+          "id": "U1620575J",
+          "name": "Zeng Jinpo"
+      },
+      {
+          "id": "U1622186B",
+          "name": "Li Shanlan"
+      },
+    ];
   }
   
   state = {
-    absentList :[],
-    presentList : [],
-    lateList : []
+    wait:false,
+    success:false,
   }
 
   componentDidMount() {
@@ -64,44 +87,58 @@ class MainScreen extends Component{
   faceRecognition= async () => {
     if (!!this.webcam.current) {
         let img = this.webcam.current.getScreenshot();
-        const request = require('request');
-        request.post({
-          headers: {'content-type' : 'application/json'},
-          url:     'http://localhost:3000/recognition',
-          body:    {rawImage:img}
-        },function (error, response, body) {
-          console.error('error:', error); // Print the error if one occurred
-          console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-          console.log('body:', body); // Print the HTML for the Google homepage.
-          body.recognizedStudentIds.forEach(s=>{
-            if (s.status ==="on-time" && !Object.keys(this.presentList.current.state.items).includes(s)){
-              //this.state.presentList.push(s);
-              this.presentList.current.addItemHandler(s.id,s.name);
-              this.absentList.current.onDeleteHandler(s.id);
-            }
-            else if (s.status ==="late" && !Object.keys(this.lateList.current.state.items).includes(s)){
-              this.lateList.current.addItemHandler(s.id, s.name);
-              this.absentList.current.onDeleteHandler(s.id);
-            }
-          });
+        const axios = require('axios');
+        axios({
+          method:'post',
+          url:     'http://10.27.80.18:3000/recognition',
+          data:    {sessionId:"1", imageName:img}
+        }).then(function (response) {
+          console.log(response);
+          JSON.parse(response).recognizedStudentIds.forEach(s=>{
+                if (s.status ==="on-time" && !Object.keys(this.presentList.current.state.items).includes(s)){
+                  //this.state.presentList.push(s);
+                  this.presentList.current.addItemHandler(s.id,s.name);
+                  this.absentList.current.onDeleteHandler(s.id);
+                }
+                else if (s.status ==="late" && !Object.keys(this.lateList.current.state.items).includes(s)){
+                  this.lateList.current.addItemHandler(s.id, s.name);
+                  this.absentList.current.onDeleteHandler(s.id);
+                }
+              });
+        })
+        .catch(function (error) {
+          console.log(error);
         });
     }
-    // var timeStamp = new Date().getTime();
-    // let mockRes = [{"id": timeStamp%10+1,"name": timeStamp%10, "status":"on-time"}];
-    // mockRes.forEach(s=>{
-    //   // if (!this.state.presentList.includes(s)){
+  }
 
-    //   // }
-    //   if (s.status ==="on-time" && !Object.keys(this.presentList.current.state.items).includes(s)){
-    //     //this.state.presentList.push(s);
-    //     this.presentList.current.addItemHandler(s.id,s.name);
-    //     this.absentList.current.onDeleteHandler(s.id);
-    //   }
-    //   else if (s.status ==="late" && !Object.keys(this.lateList.current.state.items).includes(s)){
-    //     this.lateList.current.addItemHandler(s.id, s.name);
-    //     this.absentList.current.onDeleteHandler(s.id);
-    //   }
-    // });
+  mockResponse = ()=> {
+    this.setState({wait:true,success:false});
+    setTimeout(() => {
+      let s = this.mockRes.pop();
+    if (this.mockRes.length >3){
+      //this.state.presentList.push(s);
+      this.presentList.current.addItemHandler(s.id,s.name);
+      this.absentList.current.onDeleteHandler(s.id);
+    }
+    else {
+      this.lateList.current.addItemHandler(s.id, s.name);
+      this.absentList.current.onDeleteHandler(s.id);
+    }
+    this.setState({wait:false,success:true});
+    },3000);
+  }
+
+  renderWait() {
+    if(this.state.wait){
+      return <h3>Please Wait...</h3>
+    }
+  }
+
+  renderSuccess() {
+    if(this.state.success){
+      return <h3>Successfully checked in!</h3>
+    }
   }
 
   render(){
@@ -129,6 +166,11 @@ class MainScreen extends Component{
                   screenshotFormat="image/jpeg" />
               </CardContent>
             </Card>
+            <button className=" btn-lg  btn-block " onClick={this.mockResponse} style={{
+                background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white"
+              }}>Check in</button>
+            {this.renderWait()}
+            {this.renderSuccess()}
           </Grid>
           <Grid item xs={3}>
             <Card style={styles.list}>
@@ -145,7 +187,7 @@ class MainScreen extends Component{
             </Card>
             <div className="App">
               <Popup modal trigger={<button className=" btn-lg  btn-block " style={{
-                background: 'rgb(22, 77, 124)', fontSize: '23px'
+                background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white"
               }}>Unrecognised?</button>}>
                 <br></br>
                 <div>
