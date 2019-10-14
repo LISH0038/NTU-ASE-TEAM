@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Grid from '@material-ui/core/Grid';
+import React from "react";
+import { Link } from "react-router-dom";
 
 //navigation bar 
 
 function Nav() {
 
   const [time, setTime] = useState(new Date());
+
   const navStyle1 = {
     color: "white",
     fontSize: "35px",
@@ -23,6 +26,7 @@ function Nav() {
     textDecoration: "none",
     marginTop: "10px",
     position: "absolute",
+    marginTop: "25px",
   };
 
   return (
