@@ -23,7 +23,7 @@ function controller(){
 }
 
 // used for facial recognition
-controller.prototype.detectFace = async function(recognitionData, imageBase64){
+controller.prototype.detectFace = async function(recognitionData, imageBase64, res){
   console.log("testhere1");
   try{
     await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODELS_URL);
@@ -38,59 +38,39 @@ controller.prototype.detectFace = async function(recognitionData, imageBase64){
     var buf = await new Buffer(data, 'base64');
     // var id = await env.images + '1.png';
     //TODO: solve problems with saving image
-    var image="/opt/images/"+"Jinpo.jpeg";
-    // await fs.writeFile(id, data,{encoding:'base64'},(err) => {
-      // if (err) throw err;
-      // console.log("saved");
-    // });
-    // .then(() => {
-    //   const img = await canvas.loadImage(id);
-    //   const canvas1 = faceapi.createCanvasFromMedia(id);
-    //   console.log("haha");
-    // });
-    // const img = await canvas.loadImage(id);
-    // const canvas1 = faceapi.createCanvasFromMedia(img);
-    // console.log("lzter");
-
-    // var image = await base64ToImage(imageBase64,'/opt/images/');
-    // console.log('saved');
-
-    // let base64Image = imageBase64.split(';base64,').pop();
-    // fs.writeFile('/public/images/1.png', base64Image, {encoding: 'base64'}, function(err) {
-    //   console.log('File created');
-    // });
-
-    const img = await canvas.loadImage(image);
-    const canvas1 = faceapi.createCanvasFromMedia(img);
-    // fetch image to api\
-    // console.log(blob);
-    // let img = await faceapi.fetchImage(blob);
-
-    console.log("issue post loading");
-    const displaySize = { width: img.width, height: img.height }
-    faceapi.matchDimensions(canvas1, displaySize);
-    const detections = await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
-    const resizedDetections = faceapi.resizeResults(detections, displaySize);
-    for(let i=0;i<labeledFaceDescriptors.length;i++){
-      for (let j = 0; j < labeledFaceDescriptors[i]._descriptors.length; j++) {
-        const dist = faceapi.euclideanDistance(resizedDetections[0].descriptor, labeledFaceDescriptors[i]._descriptors[j]);
-        console.log("comparing with " + j + " of " + labeledFaceDescriptors[i]._label + " data: " + dist);
+    var image="/opt/images/"+`${new Date().getTime()}.jpeg`;
+    fs.writeFile(image, buf, {encoding:'base64'}, async (err) => {
+      if (err) throw err;
+      console.log("saved");
+      const img = await canvas.loadImage(image);
+      const canvas1 = faceapi.createCanvasFromMedia(img);
+      console.log("issue post loading");
+      const displaySize = { width: img.width, height: img.height }
+      faceapi.matchDimensions(canvas1, displaySize);
+      const detections = await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
+      const resizedDetections = faceapi.resizeResults(detections, displaySize);
+      for(let i=0;i<labeledFaceDescriptors.length;i++){
+        for (let j = 0; j < labeledFaceDescriptors[i]._descriptors.length; j++) {
+          const dist = faceapi.euclideanDistance(resizedDetections[0].descriptor, labeledFaceDescriptors[i]._descriptors[j]);
+          console.log("comparing with " + j + " of " + labeledFaceDescriptors[i]._label + " data: " + dist);
+        }
       }
-    }
-    const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor));
-    const returnedIds = [];
+      const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor));
+      const returnedIds = [];
 
-    results.forEach((result, i) => {
+      results.forEach((result, i) => {
 
-      // const box = resizedDetections[i].detection.box;
-      // const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString().split("_")[1]});
-      if (regex_id.test(result.toString().split("_")[0])) {
-        returnedIds.push(result.toString().split("_")[0]);
-      }
-      // drawBox.draw(canvas1);
+        // const box = resizedDetections[i].detection.box;
+        // const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString().split("_")[1]});
+        if (regex_id.test(result.toString().split("_")[0])) {
+          returnedIds.push(result.toString().split("_")[0]);
+        }
+        // drawBox.draw(canvas1);
+      });
+      console.log(returnedIds);
+      // return { canvas: canvas1.toDataURL(), recognizedStudentIds: returnedIds};
+      return res.json({ recognizedStudentIds: returnedIds});
     });
-    console.log(returnedIds);
-    return { canvas: canvas1.toDataURL(), recognizedStudentIds: returnedIds};
   }catch(err){ throw 'Error in controllers/faceDetector.js (detectFace):\n'+err; }
 }
 

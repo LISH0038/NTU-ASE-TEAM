@@ -7,6 +7,21 @@ const express = require('express'),
     controller = require('../controllers/faceDetector.js'),
     getStudentStatus = require('../utility/getStudentStatus');
 
+global.Blob = require('blob'),
+global.CUDA_VISIBLE_DEVICES="-1";
+
+const faceapi = require('face-api.js'),
+      canvas = require('canvas'),
+      path = require('path'),
+      fetch = require('node-fetch'),
+      tf = require('@tensorflow/tfjs-node'),
+      distanceThreshold = 0.4,
+      MODELS_URL = path.join(__dirname, '/../public/models/'),
+    base64ToImage = require('base64-to-image');
+
+const regex_folder = RegExp('^[a-zA-Z][0-9]{7}[a-zA-Z]_.*'); // Folder name match in FaceDB
+const regex_id = RegExp('^[a-zA-Z][0-9]{7}[a-zA-Z]'); // Matric id match in FaceDB
+
 router.post('/', function(req, res, next) {
   var absentStudents = [];
   var recognizedStudentList = [];
@@ -46,50 +61,96 @@ router.post('/', function(req, res, next) {
 
       console.log("testhere");
 
-      cont.detectFace(labeledDescriptor, req.body.imageName).then(function(data){
+      try{
+        await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODELS_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromDisk(MODELS_URL);
+        await faceapi.nets.faceRecognitionNet.loadFromDisk(MODELS_URL);
+        await faceapi.tf.setBackend('tensorflow');
+        const labeledFaceDescriptors = await recogData(labeledDescriptor);
+        const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, distanceThreshold);
 
-        console.log(data);
-        console.log("recognized: "+ data.recognizedStudentIds);
-        for (let i=0; i< data.recognizedStudentIds.length; i++) {
-          var studentId = data.recognizedStudentIds[i];
-          if (!!absentStudents.includes(studentId)) {
-            pool.query('CALL get_student(?)', [studentId], function (err, rows, fields) {
-              var studentName = rows[0][0].student_name;
-              var status = getStudentStatus(current_time, session_start_time, session_late_time, session_absent_time);
-              // returned list
-              recognizedStudentList.push({
-                id: studentId,
-                name: studentName,
-                status: status
-              });
-
-              // todo: check update database
-              pool.query('CALL update_student_status(?,?,?,?)', [req.body.sessionId, studentId, status, current_time]);
-              console.log("session: " + req.body.sessionId + "; studentId: " + studentId + "; status: " + status + "; cur_time: " + current_time);
-
-              // return
-              if (i == data.recognizedStudentIds.length - 1) {
-                console.log(recognizedStudentList);
-                return res.status(200).json({
-                  box: data.box,
-                  // imageName: returnedJsonRecognized.imageName,
-                  recognizedStudentIds: recognizedStudentList
-                });
-              }
-            });
+        var imageBase64 = await req.body.imageName.replace(/^data:image\/\w+;base64,/, "");
+        var buf = await new Buffer(imageBase64, 'base64');
+        // var id = await env.images + '1.png';
+        //TODO: solve problems with saving image
+        var image="/opt/images/"+`${new Date().getTime()}.jpeg`;
+        fs.writeFile(image, buf, {encoding:'base64'}, async (err) => {
+          if (err) throw err;
+          console.log("saved");
+          const img = await canvas.loadImage(image);
+          const canvas1 = faceapi.createCanvasFromMedia(img);
+          console.log("issue post loading");
+          const displaySize = { width: img.width, height: img.height }
+          faceapi.matchDimensions(canvas1, displaySize);
+          const detections = await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
+          const resizedDetections = faceapi.resizeResults(detections, displaySize);
+          for(let i=0;i<labeledFaceDescriptors.length;i++){
+            for (let j = 0; j < labeledFaceDescriptors[i]._descriptors.length; j++) {
+              const dist = faceapi.euclideanDistance(resizedDetections[0].descriptor, labeledFaceDescriptors[i]._descriptors[j]);
+              console.log("comparing with " + j + " of " + labeledFaceDescriptors[i]._label + " data: " + dist);
+            }
           }
-        }
-      });
+          const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor));
+          const returnedIds = [];
 
+          results.forEach((result, i) => {
+
+            // const box = resizedDetections[i].detection.box;
+            // const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString().split("_")[1]});
+            if (regex_id.test(result.toString().split("_")[0])) {
+              returnedIds.push(result.toString().split("_")[0]);
+            }
+            // drawBox.draw(canvas1);
+          });
+          console.log(returnedIds);
+          // return { canvas: canvas1.toDataURL(), recognizedStudentIds: returnedIds};
+          returnedJson = { recognizedStudentIds: returnedIds};
+
+          for (let i=0; i< returnedJson.recognizedStudentIds.length; i++) {
+            var studentId = returnedJson.recognizedStudentIds[i];
+            if (!!absentStudents.includes(studentId)) {
+              pool.query('CALL get_student(?)', [studentId], function (err, rows, fields) {
+                var studentName = rows[0][0].student_name;
+                var status = getStudentStatus(current_time, session_start_time, session_late_time, session_absent_time);
+                // returned list
+                recognizedStudentList.push({
+                  id: studentId,
+                  name: studentName,
+                  status: status
+                });
+
+                // todo: check update database
+                pool.query('CALL update_student_status(?,?,?,?)', [req.body.sessionId, studentId, status, current_time]);
+                console.log("session: " + req.body.sessionId + "; studentId: " + studentId + "; status: " + status + "; cur_time: " + current_time);
+
+                // return
+                if (i == returnedJson.recognizedStudentIds.length - 1) {
+                  console.log(recognizedStudentList);
+                  return res.status(200).json({
+                    box: returnedJson.box,
+                    // imageName: returnedJsonRecognized.imageName,
+                    recognizedStudentIds: recognizedStudentList
+                  });
+                }
+              });
+            }
+          }
+
+        });
+      }catch(err){ throw 'Error in controllers/faceDetector.js (detectFace):\n'+err; }
 
     });
   });
 
 });
 
-// test with local image
-async function getRecognisedIds(imageBase64){
-
+// convert picture into labeled face descriptors
+async function recogData(data){
+  try{
+    return Promise.all(data.map(d => {
+      return new faceapi.LabeledFaceDescriptors(d.label, d.descriptors);
+    }))
+  }catch(err){ throw 'Error in faceDetector.js (recogData):\n'+err; }
 }
 
 module.exports = router;
