@@ -70,42 +70,42 @@
       "session_id": 1,
       "student_id": "U0000001J",
       "arrival_time": 1570176000,
-      "status": "on-time"
+      "attend_status": "on-time"
     },
     {
       "session_id": 1,
       "student_id": "U0000002J",
       "arrival_time": 99999999999,
-      "status": "absent"
+      "attend_status": "absent"
     },
     {
       "session_id": 2,
       "student_id": "U0000001J",
       "arrival_time": 1570375934,
-      "status": "late"
+      "attend_status": "late"
     },
     {
       "session_id": 2,
       "student_id": "U0000002J",
       "arrival_time": 99999999999,
-      "status": "absent"
+      "attend_status": "absent"
     },
     {
       "session_id": 3,
       "student_id": "U0000002J",
       "arrival_time": 99999999999,
-      "status": "absent"
+      "attend_status": "absent"
     }
   ],
   "students": [
     {
       "student_id": "U0000001J",
-      "name": "Harry Cao",
+      "student_name": "Harry Cao",
       "email": "harry@e.ntu.edu.sg"
     },
     {
       "student_id": "U0000002J",
-      "name": "Zeng Jinpo",
+      "student_name": "Zeng Jinpo",
       "email": "zeng@e.ntu.edu.sg"
     }
   ],
