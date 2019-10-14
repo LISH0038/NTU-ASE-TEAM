@@ -28,38 +28,60 @@ router.post('/', function(req, res, next) {
       // const current_time = Math.floor(Date.now()/1000);
       const current_time = 1570176001;
 
-      const returnedJsonRecognized = await getRecognisedIds(req.body.imageName);
-      console.log("it's here.");
-      console.log("recognized: "+ returnedJsonRecognized.recognizedStudentIds);
-      for (let i=0; i< returnedJsonRecognized.recognizedStudentIds.length; i++) {
-        var studentId = returnedJsonRecognized.recognizedStudentIds[i];
-        if (!!absentStudents.includes(studentId)) {
-          pool.query('CALL get_student(?)', [studentId], function (err, rows, fields) {
-            var studentName = rows[0][0].student_name;
-            var status = getStudentStatus(current_time, session_start_time, session_late_time, session_absent_time);
-            // returned list
-            recognizedStudentList.push({
-              id: studentId,
-              name: studentName,
-              status: status
-            });
+      const cont = new controller();
+      const labeledDescriptor = [];
+      // const absentList = ['U0000004J'];
+      const data = jsonfile.readFileSync(env.recData);
+      // only look for reference students in the absent list
+      data.forEach(d => {
+        const obj = {label: d.label};
+        let array = [];
+        d.descriptors.forEach(descriptor => {
+          const dat = new Float32Array(descriptor);
+          array.push(dat);
+        });
+        obj.descriptors = array;
+        labeledDescriptor.push(obj);
+      });
 
-            // todo: check update database
-            pool.query('CALL update_student_status(?,?,?,?)', [req.body.sessionId, studentId, status, current_time]);
-            console.log("session: " + req.body.sessionId + "; studentId: " + studentId + "; status: " + status + "; cur_time: " + current_time);
+      console.log("testhere");
 
-            // return
-            if (i == returnedJsonRecognized.recognizedStudentIds.length - 1) {
-              console.log(recognizedStudentList);
-              return res.status(200).json({
-                box: returnedJsonRecognized.box,
-                // imageName: returnedJsonRecognized.imageName,
-                recognizedStudentIds: recognizedStudentList
+      cont.detectFace(labeledDescriptor, req.body.imageName).then(function(data){
+
+        console.log(data);
+        console.log("recognized: "+ data.recognizedStudentIds);
+        for (let i=0; i< data.recognizedStudentIds.length; i++) {
+          var studentId = data.recognizedStudentIds[i];
+          if (!!absentStudents.includes(studentId)) {
+            pool.query('CALL get_student(?)', [studentId], function (err, rows, fields) {
+              var studentName = rows[0][0].student_name;
+              var status = getStudentStatus(current_time, session_start_time, session_late_time, session_absent_time);
+              // returned list
+              recognizedStudentList.push({
+                id: studentId,
+                name: studentName,
+                status: status
               });
-            }
-          });
+
+              // todo: check update database
+              pool.query('CALL update_student_status(?,?,?,?)', [req.body.sessionId, studentId, status, current_time]);
+              console.log("session: " + req.body.sessionId + "; studentId: " + studentId + "; status: " + status + "; cur_time: " + current_time);
+
+              // return
+              if (i == data.recognizedStudentIds.length - 1) {
+                console.log(recognizedStudentList);
+                return res.status(200).json({
+                  box: data.box,
+                  // imageName: returnedJsonRecognized.imageName,
+                  recognizedStudentIds: recognizedStudentList
+                });
+              }
+            });
+          }
         }
-      }
+      });
+
+
     });
   });
 
@@ -67,32 +89,7 @@ router.post('/', function(req, res, next) {
 
 // test with local image
 async function getRecognisedIds(imageBase64){
-  const cont = new controller();
-  const labeledDescriptor = [];
-  // const absentList = ['U0000004J'];
-  const data = jsonfile.readFileSync(env.recData);
-  // only look for reference students in the absent list
-  data.forEach(d => {
-    const obj = {label: d.label};
-    let array = [];
-    d.descriptors.forEach(descriptor => {
-      const dat = new Float32Array(descriptor);
-      array.push(dat);
-    });
-    obj.descriptors = array;
-    labeledDescriptor.push(obj);
-  });
 
-  console.log("testhere");
-
-  await cont.detectFace(labeledDescriptor, imageBase64).then(function(data){
-    // const image = '/images/'+data.image;
-    return {
-      // box: data.canvas,
-      // imageName: data.imageName,
-      recognizedStudentIds: data.recognizedStudentIds
-    };
-  });
 }
 
 module.exports = router;

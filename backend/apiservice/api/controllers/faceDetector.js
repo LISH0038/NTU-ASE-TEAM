@@ -34,21 +34,23 @@ controller.prototype.detectFace = async function(recognitionData, imageBase64){
     const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, distanceThreshold);
     console.log("issue pre11111 loading");
 
-    // var data = await imageBase64.replace(/^data:image\/\w+;base64,/, "");
-    // //var buf = await new Buffer(data, 'base64');
+    var data = await imageBase64.replace(/^data:image\/\w+;base64,/, "");
+    var buf = await new Buffer(data, 'base64');
     // var id = await env.images + '1.png';
     //TODO: solve problems with saving image
-    var id=env.images+"Akshaya.JPG";
+    var image="/opt/images/"+"Jinpo.jpeg";
     // await fs.writeFile(id, data,{encoding:'base64'},(err) => {
-    //   if (err) throw err;
-    //   console.log("saved");
-    // }).then(() => {
+      // if (err) throw err;
+      // console.log("saved");
+    // });
+    // .then(() => {
+    //   const img = await canvas.loadImage(id);
     //   const canvas1 = faceapi.createCanvasFromMedia(id);
     //   console.log("haha");
     // });
-    const img = await canvas.loadImage(id);
-    const canvas1 = faceapi.createCanvasFromMedia(img);
-    console.log("lzter");
+    // const img = await canvas.loadImage(id);
+    // const canvas1 = faceapi.createCanvasFromMedia(img);
+    // console.log("lzter");
 
     // var image = await base64ToImage(imageBase64,'/opt/images/');
     // console.log('saved');
@@ -58,20 +60,17 @@ controller.prototype.detectFace = async function(recognitionData, imageBase64){
     //   console.log('File created');
     // });
 
-    // const img = await canvas.loadImage(id);
+    const img = await canvas.loadImage(image);
+    const canvas1 = faceapi.createCanvasFromMedia(img);
     // fetch image to api\
     // console.log(blob);
     // let img = await faceapi.fetchImage(blob);
 
-
     console.log("issue post loading");
     const displaySize = { width: img.width, height: img.height }
     faceapi.matchDimensions(canvas1, displaySize);
-    console.log("111");
     const detections = await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
-    console.log("222");
     const resizedDetections = faceapi.resizeResults(detections, displaySize);
-    console.log("333");
     for(let i=0;i<labeledFaceDescriptors.length;i++){
       for (let j = 0; j < labeledFaceDescriptors[i]._descriptors.length; j++) {
         const dist = faceapi.euclideanDistance(resizedDetections[0].descriptor, labeledFaceDescriptors[i]._descriptors[j]);
@@ -90,6 +89,7 @@ controller.prototype.detectFace = async function(recognitionData, imageBase64){
       }
       // drawBox.draw(canvas1);
     });
+    console.log(returnedIds);
     return { canvas: canvas1.toDataURL(), recognizedStudentIds: returnedIds};
   }catch(err){ throw 'Error in controllers/faceDetector.js (detectFace):\n'+err; }
 }

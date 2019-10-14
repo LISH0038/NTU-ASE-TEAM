@@ -10,6 +10,7 @@
     "@tensorflow/tfjs-node-gpu": "^1.2.9",
     "base64-to-image": "^1.0.2",
     "blob": "0.0.5",
+    "body-parser": "^1.19.0",
     "canvas": "^2.5.0",
     "canvas-to-image": "^2.0.3",
     "cookie-parser": "~1.4.4",
