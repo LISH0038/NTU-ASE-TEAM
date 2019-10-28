@@ -1,5 +1,6 @@
 import Popup from 'reactjs-popup';
 import React, {Component} from "react";
+import { Input } from "reactstrap"
 import Webcam from "react-webcam";
 import Card from '@material-ui/core/Card';
 import "../css/MainScreen.css";
@@ -36,6 +37,8 @@ class MainScreen extends Component{
     this.presentList = React.createRef();
     this.lateList = React.createRef();
     this.webcam = React.createRef();
+    this.popupWebcam = React.createRef();
+    this.inputElement = React.createRef();
     this.mockRes = [
       {
           "id": "U1721882B",
@@ -67,21 +70,66 @@ class MainScreen extends Component{
   state = {
     wait:false,
     success:false,
+    open:false,
+    reset:false,
+    timer:10,
+    timerId:null,
+    idToRegister:null,
+    sessionId: "1",
+    currentTime: new Date(),
   }
 
   componentDidMount() {
     let courseDetails = this.props.location.state.details;
-    console.log(courseDetails.studentList);
-    let tmp={};
-    courseDetails.studentList.forEach(s =>{
-      tmp[s.student_id]=s.name;
-    });
-    console.log(tmp);
-    this.absentList.current.setState({items:tmp});
-    this.timerID = setInterval(
-      () => this.faceRecognition(),
-      5000
+    if (courseDetails.sessionId != null)
+      this.setState({sessionId:courseDetails.sessionId});
+    if (courseDetails.studentList !=null){
+      console.log(courseDetails.studentList);
+      let tmp={};
+      courseDetails.studentList.forEach(s =>{
+        tmp[s.id]=s.name;
+      });
+      console.log(tmp);
+      this.absentList.current.setState({items:tmp});
+    }
+    else if (courseDetails.onTimeList !=null){
+      let tmp={};
+      if (courseDetails.onTimeList.length >0) {
+        console.log(courseDetails.onTimeList);
+        courseDetails.onTimeList.forEach(s =>{
+          tmp[s.id]=s.name;
+        });
+        console.log("onTimeList: "+ tmp);
+        this.presentList.current.setState({items:tmp});
+      }
+      if (courseDetails.lateList.length >0) {
+        console.log(courseDetails.lateList);
+        courseDetails.lateList.forEach(s =>{
+          tmp[s.id]=s.name;
+        });
+        console.log("onTimeList: "+ tmp);
+        this.lateList.current.setState({items:tmp});
+      }
+      if (courseDetails.absentList.length >0) {
+        console.log(courseDetails.absentList);
+        courseDetails.absentList.forEach(s =>{
+          tmp[s.id]=s.name;
+        });
+        console.log("onTimeList: "+ tmp);
+        this.absentList.current.setState({items:tmp});
+      }
+    }
+    
+    // this.timerID = setInterval(
+    //   () => this.faceRecognition(),
+    //   5000
+    // );
+
+    this.timerID2 = setInterval(
+      () => this.setState({currentTime: new Date()}),
+      1000
     );
+
   }
 
   faceRecognition= async () => {
@@ -113,6 +161,7 @@ class MainScreen extends Component{
   }
 
   mockResponse = ()=> {
+    this.setState({reset:true});
     this.setState({wait:true,success:false});
     setTimeout(() => {
       let s = this.mockRes.pop();
@@ -127,6 +176,7 @@ class MainScreen extends Component{
     }
     this.setState({wait:false,success:true});
     },3000);
+    
   }
 
   renderWait() {
@@ -139,6 +189,61 @@ class MainScreen extends Component{
     if(this.state.success){
       return <h3>Successfully checked in!</h3>
     }
+  }
+  openModal=() =>{
+    clearInterval(this.state.timerId);
+    this.setState({ open: true});
+    this.setState({timer:11});
+    // setInterval(this.setState({reset:true}),2000);
+  }
+  closeModal=() =>{
+    clearInterval(this.state.timerId);
+    this.setState({ open: false});
+  }
+
+  onInputId = (event)=> {
+    this.setState({idToRegister: event.target.value});
+  };
+
+  callRegisterAPI = (images ) =>{
+    let data = {sessionId:"1", studentId:this.state.idToRegister, images: images}
+    console.log(data);
+
+    require('axios')({
+      method:'post',
+      url:     'http://10.27.80.18:3000/register',
+      data:   data 
+    }).then(function (response) {
+      console.log('statusCode:', response && response.statusCode);
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  }
+
+  startRegister = () =>{
+    let images = []
+    let id = setInterval(()=>
+    {
+      if (!!this.popupWebcam.current) {
+        images.push(this.popupWebcam.current.getScreenshot());
+      }
+
+      console.log(this.state.timer);
+      if (this.state.timer===1){
+        this.setState({timer:"You may close this window now."});
+      }
+      else{
+        this.setState({timer:this.state.timer-1});
+      }
+    },1000);
+    this.setState({timerId:id});
+
+    setTimeout(() => { 
+      clearInterval(id);
+      //console.log(images);
+      this.callRegisterAPI(images);
+    }, 1000);
   }
 
   render(){
@@ -154,9 +259,11 @@ class MainScreen extends Component{
               </Card>
           </Grid>
           <Grid item xs={6}>
+          
             <Card style={styles.mainCamera}>
               <CardContent>
-                <h1>Main Camera</h1>
+              <h3>---- Current Time: {this.state.currentTime.toLocaleTimeString()}  ----  Session ID: {this.state.sessionId}  ----</h3>
+                {/* <h1>Main Camera</h1> */}
                 <Webcam
                   ref={this.webcam}
                   audio={false}
@@ -186,19 +293,28 @@ class MainScreen extends Component{
               </CardContent>
             </Card>
             <div className="App">
-              <Popup modal trigger={<button className=" btn-lg  btn-block " style={{
+            <button onClick={this.openModal} className=" btn-lg  btn-block " style={{
                 background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white"
-              }}>Unrecognised?</button>}>
+              }} >Unrecognised?</button>
+              <Popup 
+                  open={this.state.open}
+                  closeOnDocumentClick
+                  onClose={this.closeModal}>
                 <br></br>
                 <div>
-                  <h3>Plesae rotate your head</h3>
-                  <Webcam>
+                  <h3>{this.state.timer>10 ? "Please input your matric number then click start button.":this.state.timer>1 ? "Please keep rotating your head. "+this.state.timer : "You may close the window now"}</h3>
+                  <Webcam ref={this.popupWebcam}>
+                    
                     flex={1}
                     audio = {false}
                     width={300}
                     height={200}
                     screenshotFormat={"image/jpeg"}
                   </Webcam>
+                  <Input placeholder="Matric No." style={{ fontSize: '23px' }} onChange={this.onInputId}/>
+                  <button onClick={this.startRegister} className=" btn-lg  btn-block " style={{
+                    background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white"
+                  }} >Start Recording Face</button>
                 </div>
               </Popup>
             </div>
