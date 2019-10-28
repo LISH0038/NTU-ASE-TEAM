@@ -16,13 +16,13 @@ class Table extends Component {
     }
   }
 
-  render() { //Whenever our class runs, render method will be called automatically, it may have already defined in the constructor behind the scene.
-    return (
-      <div>
-        <h1>Summary Report</h1>
-      </div>
-    )
-  }
+  // render() { //Whenever our class runs, render method will be called automatically, it may have already defined in the constructor behind the scene.
+  //   return (
+  //     <div>
+  //       <h1>Summary Report</h1>
+  //     </div>
+  //   )
+  // }
 
   renderTableData() {
     return this.state.students.map((student, index) => {
@@ -38,18 +38,18 @@ class Table extends Component {
     })
   }
 
-  render() {
-    return (
-      <div>
-        <h1 id='title'>Summary Report</h1>
-        <table id='students'>
-          <tbody>
-            {this.renderTableData()}
-          </tbody>
-        </table>
-      </div>
-    )
-  }
+  // render() {
+  //   return (
+  //     <div>
+  //       <h1 id='title'>Summary Report</h1>
+  //       <table id='students'>
+  //         <tbody>
+  //           {this.renderTableData()}
+  //         </tbody>
+  //       </table>
+  //     </div>
+  //   )
+  // }
 
   renderTableHeader() {
     let header = Object.keys(this.state.students[0])
