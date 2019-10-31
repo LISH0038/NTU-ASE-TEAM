@@ -1,9 +1,8 @@
 import React from "react";
 import "./css/App.css";
-import Nav from "./components/Nav";
-import MainScreen from "./components/MainScreen";
+import Nav from "./components/Nav";import MainScreen from "./components/MainScreen";
 import Home from "./components/Home";
-import SummaryReport from "./components/SummaryReport";
+// import SummaryReport from "./components/SummaryReport";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 function App() {
@@ -14,7 +13,7 @@ function App() {
         <Switch>
           <Route path="/home" exact component={Home} />
           <Route path="/mainscreen" component={MainScreen} />
-          <Route path="/summaryReport" component={SummaryReport} />
+           {/* <Route path="/summaryReport" component={SummaryReport} /> */}
         </Switch>
       </div>
     </Router>

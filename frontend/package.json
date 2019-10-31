@@ -11,6 +11,7 @@
     "react-bootstrap": "^1.0.0-beta.12",
     "react-clock": "^2.4.0",
     "react-dom": "^16.9.0",
+    "react-dropdown": "^1.6.4",
     "react-popup": "^0.10.0",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.1.1",

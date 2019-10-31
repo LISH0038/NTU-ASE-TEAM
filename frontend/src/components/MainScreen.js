@@ -7,6 +7,7 @@ import "../css/MainScreen.css";
 import ItemList from "./listcomponents/ItemsList/ItemsList";
 import Grid from '@material-ui/core/Grid';
 import { CardContent } from "@material-ui/core";
+import Table from "./SummaryReport";
 
 const styles = {
   root: {
@@ -15,7 +16,8 @@ const styles = {
   container: {
     padding: "10px",
     "justify-content": "center",
-    display: "inline-flex",
+    //display: "inline-flex",
+    "max-height": "100vh",
   },
   list: {
     margin: "20px",
@@ -75,14 +77,18 @@ class MainScreen extends Component{
     timer:10,
     timerId:null,
     idToRegister:null,
+    index:0,
     sessionId: "1",
     currentTime: new Date(),
+    summaryReport: false,
   }
 
   componentDidMount() {
     let courseDetails = this.props.location.state.details;
     if (courseDetails.sessionId != null)
       this.setState({sessionId:courseDetails.sessionId});
+    if (courseDetails.index != null)
+      this.setState({index:courseDetails.index});
     if (courseDetails.studentList !=null){
       console.log(courseDetails.studentList);
       let tmp={};
@@ -201,6 +207,13 @@ class MainScreen extends Component{
     this.setState({ open: false});
   }
 
+  showSummaryReport = () =>{
+    this.setState({summaryReport: true});
+  }
+
+  closeSummaryReport = () =>{
+    this.setState({summaryReport: false});
+  }
   onInputId = (event)=> {
     this.setState({idToRegister: event.target.value});
   };
@@ -247,6 +260,7 @@ class MainScreen extends Component{
   }
 
   render(){
+    if (!this.state.summaryReport){
     return (
       <div>
         <Grid container style={styles.root} spacing= {3}>
@@ -274,12 +288,12 @@ class MainScreen extends Component{
               </CardContent>
             </Card>
             <button className=" btn-lg  btn-block " onClick={this.mockResponse} style={{
-                background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white"
+                background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white", margin: "10px 0"
               }}>Check in</button>
             {this.renderWait()}
             {this.renderSuccess()}
           </Grid>
-          <Grid item xs={3}>
+          <Grid style={styles.container} item xs={3}>
             <Card style={styles.list}>
               <CardContent>
                 <h5>Present List</h5>
@@ -292,7 +306,7 @@ class MainScreen extends Component{
                 <ItemList ref={this.lateList} color="orange"/>
               </CardContent>
             </Card>
-            <div className="App">
+            {/* <div className="App"> */}
             <button onClick={this.openModal} className=" btn-lg  btn-block " style={{
                 background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white"
               }} >Unrecognised?</button>
@@ -317,10 +331,26 @@ class MainScreen extends Component{
                   }} >Start Recording Face</button>
                 </div>
               </Popup>
-            </div>
+            {/* </div> */}
+
+            <button onClick={this.showSummaryReport} className=" btn-lg  btn-block " style={{
+                background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white", margin: "10px 0"
+              }} >View Summary Report</button>
           </Grid>
         </Grid>
       </div>
+    );}
+    else 
+    return (
+      <div style={{textAlign:"center",display: "inline-block"}}>
+        <Table 
+        style={{display:"inline-block"}} 
+        backFunction={this.closeSummaryReport} 
+        index={this.state.index} 
+        sessionId={this.state.sessionId}
+        ></Table>
+      </div>
+      
     );
   }
 }

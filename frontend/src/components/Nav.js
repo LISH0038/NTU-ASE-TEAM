@@ -36,10 +36,11 @@ function Nav() {
             NTU E-tendance System
           </Link>
          </Grid>
-          <Grid item xs={5}>
 
+          <Grid item xs={5}>
           </Grid>
-          <Grid item xs={1}>
+          
+          {/* <Grid item xs={1}>
             <Link style={navStyle} to="/home">
               Home
             </Link>
@@ -48,7 +49,7 @@ function Nav() {
         <Link style={navStyle} to="summaryReport">
           Summary Report
         </Link>
-        </Grid>
+        </Grid> */}
       </Grid>
     </nav >
   );
