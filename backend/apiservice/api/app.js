@@ -8,10 +8,9 @@ var classRouter = require('./routes/class');
 var recognitionRouter = require('./routes/recognition');
 var registerRouter = require('./routes/register');
 var recordRouter = require('./routes/record');
-var indexRouter = require('./routes/index');
+var getRecDataRouter = require('./routes/getRecData');
+var reportRouter = require('./routes/report');
 var bodyParser = require('body-parser');
-
-
 var app = express();
 
 // view engine setup
@@ -37,10 +36,11 @@ app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-app.use('/', indexRouter);
+app.use('/generateRecData', getRecDataRouter);
 app.use('/index', classRouter);
 app.use('/recognition', recognitionRouter);
 app.use('/register', registerRouter);
+app.use('/report', reportRouter);
 app.use('/record', recordRouter);
 
 module.exports = app;

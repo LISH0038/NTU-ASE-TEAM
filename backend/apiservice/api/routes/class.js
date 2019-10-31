@@ -12,7 +12,7 @@ router.get('/:classId', function(req, res, next) {
   if (error) return res.status(400).send("The class index can only be 5 digit integers.");
 
   pool.query('CALL get_class(?)', [req.params.classId], function (err, rows, fields) {
-    if (err) return res.status(500).send('Error when retriving class');
+    if (err) return res.status(500).send('Error when retrieving class');
 
     if (rows[0].length == 0) return res.status(404).send('The class index was not found.');
     const course = rows[0][0];

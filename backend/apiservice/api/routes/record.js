@@ -21,7 +21,7 @@ router.get('/:sessionId', function(req, res, next) {
   // 404 if the session index is not in the database
   pool.query('CALL get_class_start_late_absent_time(?)',[req.params.sessionId],function (err,rows,fields) {
     if (err) return res.status(500).send('Error when retrieving the session');
-    if (rows[0].length == 0) return res.status(404).send('The session id 1 was not found');
+    if (rows[0].length == 0) return res.status(404).send('The session id is not found');
     session_start_time = rows[0][0].start_time;
     session_late_time = session_start_time + rows[0][0].late_time*60;
     session_absent_time = session_start_time + rows[0][0].absent_time*60;

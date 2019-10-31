@@ -31,7 +31,7 @@ CREATE TABLE report (
   session_id    INT        NOT NULL,
   student_id    CHAR(9)    NOT NULL,
   arrival_time  INT(11),
-  attend_status ENUM('on-time', 'late', 'absent') NOT NULL,
+  attend_status ENUM('on-time', 'late', 'exempted', 'absent') NOT NULL,
   FOREIGN KEY (session_id) REFERENCES class_session(session_id),
   FOREIGN KEY (student_id) REFERENCES student(student_id)
 ) ENGINE = INNODB;
@@ -128,15 +128,16 @@ CREATE PROCEDURE get_student_in_class(IN class_index INT)
   END //
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS get_student_id_in_class;
+DROP PROCEDURE IF EXISTS get_student_with_id_in_class;
 DELIMITER //
-CREATE PROCEDURE get_student_id_in_class(IN class_index INT, IN student_id CHAR(9))
+CREATE PROCEDURE get_student_with_id_in_class(IN class_index INT, IN student_id CHAR(9))
 BEGIN
-    SELECT student_id
+    SELECT student.student_id, student.student_name
     FROM student_class
-    WHERE student_class.class_index = class_index
-    AND student_class.student_id = student_id;
-END //
+    INNER JOIN student ON student_class.student_id = student.student_id
+     WHERE student_class.class_index = class_index
+     AND student_class.student_id = student_id;
+  END //
 DELIMITER ;
 
 /**
@@ -190,6 +191,16 @@ CREATE PROCEDURE get_report(IN session_id INT)
   END //
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS get_complete_report;
+DELIMITER //
+CREATE PROCEDURE get_complete_report(IN session_id INT)
+  BEGIN
+    SELECT report.student_id, student.student_name, report.attend_status, student.email
+    FROM report INNER JOIN student ON report.student_id = student.student_id
+    WHERE report.session_id = session_id;
+  END //
+DELIMITER ;
+
 DROP PROCEDURE IF EXISTS get_absent_students;
 DELIMITER //
 CREATE PROCEDURE get_absent_students(IN session_id INT)
@@ -224,10 +235,23 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS update_student_status;
 DELIMITER //
-CREATE PROCEDURE update_student_status(IN session_id INT, IN student_id CHAR(9), IN attend_status ENUM('on-time', 'late', 'absent'), IN arrival_time TIMESTAMP)
+CREATE PROCEDURE update_student_status(IN session_id INT, IN student_id CHAR(9), IN attend_status ENUM('on-time', 'late', 'exempted', 'absent'), IN arrival_time INT(11))
 BEGIN
     update report
     set report.attend_status = attend_status, report.arrival_time = arrival_time
+    where report.session_id=session_id and report.student_id = student_id;
+END //
+DELIMITER ;
+
+call update_student_status(1,'U1721882B','exempted',NULL);
+
+
+DROP PROCEDURE IF EXISTS get_student_status;
+DELIMITER //
+CREATE PROCEDURE get_student_status(IN session_id INT, IN student_id CHAR(9))
+BEGIN
+    select student_id, arrival_time, attend_status
+    from report
     where report.session_id=session_id and report.student_id = student_id;
 END //
 DELIMITER ;

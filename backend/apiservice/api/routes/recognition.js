@@ -59,13 +59,25 @@ router.post('/', function(req, res, next) {
         labeledDescriptor.push(obj);
       });
 
-      console.log("testhere");
-
       try{
         await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODELS_URL);
         await faceapi.nets.faceLandmark68Net.loadFromDisk(MODELS_URL);
         await faceapi.nets.faceRecognitionNet.loadFromDisk(MODELS_URL);
         await faceapi.tf.setBackend('tensorflow');
+
+        const labeledDescriptor = [];
+        const data = jsonfile.readFileSync(env.recData);
+        data.forEach(d => {
+          const obj = {label: d.label};
+          let array = [];
+          d.descriptors.forEach(descriptor => {
+            const dat = new Float32Array(descriptor);
+            array.push(dat);
+          });
+          obj.descriptors = array;
+          labeledDescriptor.push(obj);
+        });
+
         const labeledFaceDescriptors = await recogData(labeledDescriptor);
         const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, distanceThreshold);
 
@@ -94,13 +106,9 @@ router.post('/', function(req, res, next) {
           const returnedIds = [];
 
           results.forEach((result, i) => {
-
-            // const box = resizedDetections[i].detection.box;
-            // const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString().split("_")[1]});
             if (regex_id.test(result.toString().split("_")[0])) {
               returnedIds.push(result.toString().split("_")[0]);
             }
-            // drawBox.draw(canvas1);
           });
           console.log(returnedIds);
           // return { canvas: canvas1.toDataURL(), recognizedStudentIds: returnedIds};
@@ -120,8 +128,9 @@ router.post('/', function(req, res, next) {
                 });
 
                 // todo: check update database
-                pool.query('CALL update_student_status(?,?,?,?)', [req.body.sessionId, studentId, status, current_time]);
-                console.log("session: " + req.body.sessionId + "; studentId: " + studentId + "; status: " + status + "; cur_time: " + current_time);
+                pool.query('CALL update_student_status(?,?,?,?)', [req.body.sessionId, studentId, status, current_time], function (err,rows,fields) {
+                  console.log("session: " + req.body.sessionId + "; studentId: " + studentId + "; status: " + status + "; cur_time: " + current_time);
+                });
 
                 // return
                 if (i == returnedJson.recognizedStudentIds.length - 1) {
