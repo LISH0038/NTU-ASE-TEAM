@@ -15,37 +15,47 @@ class Table extends Component {
       editFlag:[],
       open:false,
       inputPwd:null,
+      success:false,
     }
   }
 
   componentDidMount() {
-    // require('axios')({
-    //   method:'get',
-    //   url:     'http://10.27.80.18:3000/report/'+this.props.sessionId,
-    // }).then(function (response) {
-    //   console.log('statusCode:', response && response.statusCode);
-    //   this.setState({students:JSON.parse(response).students});
-    // })
-    // .catch(function (error) {
-    //   console.log(error);
-    // });
+    require('axios')({
+      method:'get',
+      url:     'http://localhost:3000/report/'+this.props.sessionId,
+    }).then(function (response) {
+      console.log('statusCode:', response && response.statusCode);
+      this.setState({students:JSON.parse(response).students});
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
 
-    let mockRes = {
-      index:10001,
-      sessionId:"111",
-      students: [
-      { id: 1272677, name: 'Simon El Nahas', attendance: 'PRESENT', email: 'simonel@e.ntu.edu.com' },
-      { id: 1627351, name: 'Li Shanlan', attendance: 'LATE', email: 'shan004@e.ntu.edu.com' },
-      { id: 1872636, name: 'Cao Ngoc Thi', attendance: 'ABSENT', email: 'caothai@e.ntu.edu.com' },
-      { id: 123456, name: 'Sophie Turner', attendance: 'ABSENT', email: 'queenofnorth@gmail.com' }
-    ]}
+    // let mockRes = {
+    //   index:10001,
+    //   sessionId:"1",
+    //   students: [
+    //   { id: "U1721882B", name: 'Rajasekara Pandian Akshaya Muthu', attendance: 'LATE', email: 'simonel@e.ntu.edu.com' },
+    //   { id: "N1902163K", name: 'Simon El Nahas Christensen', attendance: 'ABSENT', email: 'shan004@e.ntu.edu.com' },
+    //   { id: "U1721642E", name: 'MN Shaanmugam', attendance: 'ABSENT', email: 'caothai@e.ntu.edu.com' },
+    //   { id: "U1620058E", name: 'Harry Cao', attendance: 'ABSENT', email: 'queenofnorth@gmail.com' },
+    //   { id: "U1620575J", name: 'Zeng Jinpo', attendance: 'PRESENT', email: 'zjp008@e.ntu.edu.com' },
+    //   { id: "U1622186B", name: 'Li Shanlan', attendance: 'PRESENT', email: 'melodyli710@gmail.com' }
+    // ]}
 
-    this.setState({students:mockRes.students});
+    //this.setState({students:mockRes.students});
   }
 
   toggleEditMode = () =>{
     this.setState({ open: true});
   }
+
+  renderSuccess() {
+    if(this.state.success){
+      return <h3>Successfully Saved!</h3>
+    }
+  }
+
 
   saveStatusChange = () =>{
     let data = this.state.editFlag.map((index)=>{
@@ -55,7 +65,7 @@ class Table extends Component {
     console.log(data)
     require('axios')({
       method:'patch',
-      url:     'http://10.27.80.18:3000/report/'+this.props.sessionId,
+      url:     'http://localhost:3000/report/'+this.props.sessionId,
       data:   data 
     }).then(function (response) {
       console.log('statusCode:', response && response.statusCode);
@@ -64,7 +74,7 @@ class Table extends Component {
       console.log(error);
     });
 
-    this.setState({disable:!this.state.disable});
+    this.setState({disable:!this.state.disable, success:true});
     console.log(this.state.disable);
   }
 
@@ -154,6 +164,7 @@ class Table extends Component {
         <button onClick={this.props.backFunction} className=" btn-lg  btn-block " style={{
           background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white", margin: "10px 10px",width:"15%", display:"inline-block"
         }} >Back</button>
+        {this.renderSuccess()}
       </div>
     )
   }

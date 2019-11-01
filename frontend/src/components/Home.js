@@ -20,80 +20,80 @@ class Home extends React.Component {
   };
 
   submitAndRedirect = ()=>{
-    // const request = require('request');
-    // if (this.state.sessionId != null){
-    //   request('http://10.27.80.18:3000/record/'+ this.state.sessionId, (error, response, body) =>{
-    //     console.error('error:', error); // Print the error if one occurred
-    //     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    //     console.log('body:', body); // Print the HTML for the Google homepage.
-    //     this.setState({details:JSON.parse(body),redirect:true});
-    //   });
-    // }
-    // else{
-    //   request('http://10.27.80.18:3000/index/'+ this.state.index, (error, response, body) =>{
-    //     console.error('error:', error); // Print the error if one occurred
-    //     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    //     console.log('body:', body); // Print the HTML for the Google homepage.
-    //     this.setState({details:JSON.parse(body),redirect:true});
-    //   });
-    // }
+    const request = require('request');
+    if (this.state.sessionId != null){
+      request('http://localhost:3000/record/'+ this.state.sessionId, (error, response, body) =>{
+        console.error('error:', error); // Print the error if one occurred
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        console.log('body:', body); // Print the HTML for the Google homepage.
+        this.setState({details:JSON.parse(body),redirect:true});
+      });
+    }
+    else{
+      request('http://localhost:3000/index/'+ this.state.index, (error, response, body) =>{
+        console.error('error:', error); // Print the error if one occurred
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        console.log('body:', body); // Print the HTML for the Google homepage.
+        this.setState({details:JSON.parse(body),redirect:true});
+      });
+    }
 
-    let mockRes = {
-      "index": 10001,
-      "sessionId": 1,
-      "schedule": {
-          "startTime": 1570176000,
-          "lateTime": 1570176600,
-          "endTime": 1570177200
-      },
-      "studentList": [
-          {
-              "id": "U1620058E",
-              "name": "Harry Cao"
-          },
-          {
-              "id": "U1620575J",
-              "name": "Zeng Jinpo"
-          },
-          {
-              "id": "U1721882B",
-              "name": "Rajasekara Pandian Akshaya Muthu"
-          },
-          {
-              "id": "U1721642E",
-              "name": "MN Shaanmugam"
-          },
-          {
-              "id": "U1622186B",
-              "name": "Li Shanlan"
-          },
-          {
-              "id": "N1902163K",
-              "name": "Simon El Nahas Christensen"
-          }
-        ]};
+    // let mockRes = {
+    //   "index": 10001,
+    //   "sessionId": 1,
+    //   "schedule": {
+    //       "startTime": 1570176000,
+    //       "lateTime": 1570176600,
+    //       "endTime": 1570177200
+    //   },
+    //   "absentList": [
+    //       {
+    //           "id": "U1620058E",
+    //           "name": "Harry Cao"
+    //       },
+    //       {
+    //           "id": "U1721642E",
+    //           "name": "MN Shaanmugam"
+    //       },
 
-      let Mock2 = {
-        "index":"xxx",
-        "schedule":{"startTime":"152623456123",
-                      "lateTime": "152623456999",
-                      "endTime": "152623460000"},
-        "onTimeList": [{"id": "xxxxxx",
-          "name": "xxx",
-            },
-        {"id": "xxxxxx",
-          "name": "xxx",
-            },
-        {"id": "xxxxxx",
-          "name": "xxx",
-            },
-        {"id": "xxxxxx",
-          "name": "xxx",
-          }],
-        "lateList":[],
-        "absentList":[]
-        };
-     this.setState({details:Mock2,redirect:true});
+    //       {
+    //           "id": "N1902163K",
+    //           "name": "Simon El Nahas Christensen"
+    //       }
+    //     ],
+    //   "onTimeList":[          {
+    //     "id": "U1622186B",
+    //     "name": "Li Shanlan"
+    //       },          {
+    //         "id": "U1620575J",
+    //         "name": "Zeng Jinpo"
+    //     }],
+    //   "lateList":[          {
+    //     "id": "U1721882B",
+    //     "name": "Rajasekara Pandian Akshaya Muthu"
+    // }]};
+
+    //   let Mock2 = {
+    //     "index":"xxx",
+    //     "schedule":{"startTime":"152623456123",
+    //                   "lateTime": "152623456999",
+    //                   "endTime": "152623460000"},
+    //     "onTimeList": [{"id": "xxxxxx",
+    //       "name": "xxx",
+    //         },
+    //     {"id": "xxxxxx",
+    //       "name": "xxx",
+    //         },
+    //     {"id": "xxxxxx",
+    //       "name": "xxx",
+    //         },
+    //     {"id": "xxxxxx",
+    //       "name": "xxx",
+    //       }],
+    //     "lateList":[],
+    //     "absentList":[]
+    //     };
+    //  this.setState({details:mockRes,redirect:true});
   };
 
   renderMainscreen = (details)=> {

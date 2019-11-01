@@ -41,32 +41,59 @@ class MainScreen extends Component{
     this.webcam = React.createRef();
     this.popupWebcam = React.createRef();
     this.inputElement = React.createRef();
-    this.mockRes = [
-      {
-          "id": "U1721882B",
-          "name": "Rajasekara Pandian Akshaya Muthu"
-      },
-      {
-        "id": "N1902163K",
-        "name": "Simon El Nahas Christensen"
-      },
-      {
-          "id": "U1721642E",
-          "name": "MN Shaanmugam"
-      },
-      {
-        "id": "U1620058E",
-        "name": "Harry Cao"
-      },
-      {
-          "id": "U1620575J",
-          "name": "Zeng Jinpo"
-      },
-      {
-          "id": "U1622186B",
-          "name": "Li Shanlan"
-      },
-    ];
+    this.mockResCount =0;
+    // this.initStudentList = [
+    //   {
+    //       "id": "U1620058E",
+    //       "name": "Harry Cao"
+    //   },
+    //   {
+    //       "id": "U1620575J",
+    //       "name": "Zeng Jinpo"
+    //   },
+    //   {
+    //       "id": "U1721882B",
+    //       "name": "Rajasekara Pandian Akshaya Muthu"
+    //   },
+    //   {
+    //       "id": "U1721642E",
+    //       "name": "MN Shaanmugam"
+    //   },
+    //   {
+    //       "id": "U1622186B",
+    //       "name": "Li Shanlan"
+    //   },
+    //   {
+    //       "id": "N1902163K",
+    //       "name": "Simon El Nahas Christensen"
+    //   }
+    // ];
+    // this.mockRes = [
+    //   {
+    //     "id": "N1902163K",
+    //     "name": "Simon El Nahas Christensen"
+    //   },
+    //   {
+    //       "id": "U1721642E",
+    //       "name": "MN Shaanmugam"
+    //   },
+    //   {
+    //     "id": "U1620058E",
+    //     "name": "Harry Cao"
+    //   },
+    //   {
+    //       "id": "U1620575J",
+    //       "name": "Zeng Jinpo"
+    //   },
+    //   {
+    //     "id": "U1721882B",
+    //     "name": "Rajasekara Pandian Akshaya Muthu"
+    // },
+    //   {
+    //       "id": "U1622186B",
+    //       "name": "Li Shanlan"
+    //   },
+    // ];
   }
 
   state = {
@@ -81,9 +108,78 @@ class MainScreen extends Component{
     sessionId: "1",
     currentTime: new Date(),
     summaryReport: false,
+    unrecog: false,
   }
 
   componentDidMount() {
+    // let courseDetails = {
+    //   "index": 10001,
+    //   "sessionId": 1,
+    //   "schedule": {
+    //       "startTime": 1570176000,
+    //       "lateTime": 1570176600,
+    //       "endTime": 1570177200
+    //   },
+    //   "absentList": [
+    //       {
+    //           "id": "U1620058E",
+    //           "name": "Harry Cao"
+    //       },
+    //       {
+    //           "id": "U1721642E",
+    //           "name": "MN Shaanmugam"
+    //       },
+
+    //       {
+    //           "id": "N1902163K",
+    //           "name": "Simon El Nahas Christensen"
+    //       }
+    //     ],
+    //   "onTimeList":[          {
+    //     "id": "U1622186B",
+    //     "name": "Li Shanlan"
+    //       },          {
+    //         "id": "U1620575J",
+    //         "name": "Zeng Jinpo"
+    //     }],
+    //   "lateList":[          {
+    //     "id": "U1721882B",
+    //     "name": "Rajasekara Pandian Akshaya Muthu"
+    // }]};
+    // let courseDetails = {
+    //   "index": 10001,
+    //   "sessionId": 1,
+    //   "schedule": {
+    //       "startTime": 1570176000,
+    //       "lateTime": 1570176600,
+    //       "endTime": 1570177200
+    //   },
+    //   "studentList": [
+    //       {
+    //           "id": "U1620058E",
+    //           "name": "Harry Cao"
+    //       },
+    //       {
+    //           "id": "U1620575J",
+    //           "name": "Zeng Jinpo"
+    //       },
+    //       {
+    //           "id": "U1721882B",
+    //           "name": "Rajasekara Pandian Akshaya Muthu"
+    //       },
+    //       {
+    //           "id": "U1721642E",
+    //           "name": "MN Shaanmugam"
+    //       },
+    //       {
+    //           "id": "U1622186B",
+    //           "name": "Li Shanlan"
+    //       },
+    //       {
+    //           "id": "N1902163K",
+    //           "name": "Simon El Nahas Christensen"
+    //       }
+    //     ]};
     let courseDetails = this.props.location.state.details;
     if (courseDetails.sessionId != null)
       this.setState({sessionId:courseDetails.sessionId});
@@ -99,8 +195,9 @@ class MainScreen extends Component{
       this.absentList.current.setState({items:tmp});
     }
     else if (courseDetails.onTimeList !=null){
-      let tmp={};
+      
       if (courseDetails.onTimeList.length >0) {
+        let tmp={};
         console.log(courseDetails.onTimeList);
         courseDetails.onTimeList.forEach(s =>{
           tmp[s.id]=s.name;
@@ -109,6 +206,7 @@ class MainScreen extends Component{
         this.presentList.current.setState({items:tmp});
       }
       if (courseDetails.lateList.length >0) {
+        let tmp={};
         console.log(courseDetails.lateList);
         courseDetails.lateList.forEach(s =>{
           tmp[s.id]=s.name;
@@ -117,6 +215,7 @@ class MainScreen extends Component{
         this.lateList.current.setState({items:tmp});
       }
       if (courseDetails.absentList.length >0) {
+        let tmp={};
         console.log(courseDetails.absentList);
         courseDetails.absentList.forEach(s =>{
           tmp[s.id]=s.name;
@@ -144,21 +243,29 @@ class MainScreen extends Component{
         const axios = require('axios');
         axios({
           method:'post',
-          url:     'http://10.27.80.18:3000/recognition',
+          url:     'http://localhost:3000/recognition',
           data:    {sessionId:"1", imageName:img}
         }).then(function (response) {
           console.log(response);
-          JSON.parse(response).recognizedStudentIds.forEach(s=>{
-                if (s.status ==="on-time" && !Object.keys(this.presentList.current.state.items).includes(s)){
-                  //this.state.presentList.push(s);
-                  this.presentList.current.addItemHandler(s.id,s.name);
-                  this.absentList.current.onDeleteHandler(s.id);
-                }
-                else if (s.status ==="late" && !Object.keys(this.lateList.current.state.items).includes(s)){
-                  this.lateList.current.addItemHandler(s.id, s.name);
-                  this.absentList.current.onDeleteHandler(s.id);
-                }
-              });
+          let recogList = JSON.parse(response).recognizedStudentIds;
+          if (recogList.length>0){
+            recogList.forEach(s=>{
+              if (s.status ==="on-time" && !Object.keys(this.presentList.current.state.items).includes(s)){
+                //this.state.presentList.push(s);
+                this.presentList.current.addItemHandler(s.id,s.name);
+                this.absentList.current.onDeleteHandler(s.id);
+              }
+              else if (s.status ==="late" && !Object.keys(this.lateList.current.state.items).includes(s)){
+                this.lateList.current.addItemHandler(s.id, s.name);
+                this.absentList.current.onDeleteHandler(s.id);
+              }
+            });
+            this.setState({wait:false,success:true, unrecog: false});
+          }
+          else{
+            this.setState({wait:false,success:false, unrecog: true});
+          }
+
         })
         .catch(function (error) {
           console.log(error);
@@ -166,23 +273,10 @@ class MainScreen extends Component{
     }
   }
 
-  mockResponse = ()=> {
-    this.setState({reset:true});
-    this.setState({wait:true,success:false});
-    setTimeout(() => {
-      let s = this.mockRes.pop();
-    if (this.mockRes.length >3){
-      //this.state.presentList.push(s);
-      this.presentList.current.addItemHandler(s.id,s.name);
-      this.absentList.current.onDeleteHandler(s.id);
-    }
-    else {
-      this.lateList.current.addItemHandler(s.id, s.name);
-      this.absentList.current.onDeleteHandler(s.id);
-    }
-    this.setState({wait:false,success:true});
-    },3000);
-    
+  takeAttendance = ()=> {
+      this.setState({reset:true});
+      this.setState({wait:true,success:false, unrecog: false});
+      this.faceRecognition();
   }
 
   renderWait() {
@@ -196,6 +290,13 @@ class MainScreen extends Component{
       return <h3>Successfully checked in!</h3>
     }
   }
+
+  renderUnrecog() {
+    if(this.state.unrecog){
+      return <h3>Unrecognised Student!</h3>
+    }
+  }
+
   openModal=() =>{
     clearInterval(this.state.timerId);
     this.setState({ open: true});
@@ -223,9 +324,12 @@ class MainScreen extends Component{
     let data = {sessionId:"1", studentId:this.state.idToRegister, images: images}
     console.log(data);
 
+    this.presentList.current.addItemHandler(this.state.idToRegister,"Name");
+    this.absentList.current.onDeleteHandler(this.state.idToRegister);
+
     require('axios')({
       method:'post',
-      url:     'http://10.27.80.18:3000/register',
+      url:     'http://localhost:3000/register',
       data:   data 
     }).then(function (response) {
       console.log('statusCode:', response && response.statusCode);
@@ -257,7 +361,8 @@ class MainScreen extends Component{
       clearInterval(id);
       //console.log(images);
       this.callRegisterAPI(images);
-    }, 1000);
+    }, 11000);
+    
   }
 
   render(){
@@ -269,7 +374,7 @@ class MainScreen extends Component{
             <Card style={styles.list}>
               <CardContent>
                 <h5>Absent List</h5>
-                <ItemList ref={this.absentList} initList={this.props.location.state.details.studentList} color="orangered"/>
+                <ItemList ref={this.absentList} color="orangered"/>
               </CardContent>
               </Card>
           </Grid>
@@ -288,11 +393,12 @@ class MainScreen extends Component{
                   screenshotFormat="image/jpeg" />
               </CardContent>
             </Card>
-            <button className=" btn-lg  btn-block " onClick={this.mockResponse} style={{
+            <button className=" btn-lg  btn-block " onClick={this.takeAttendance} style={{
                 background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white", margin: "10px 0"
               }}>Check in</button>
             {this.renderWait()}
             {this.renderSuccess()}
+            {this.renderUnrecog()}
           </Grid>
           <Grid style={styles.container} item xs={3}>
             <Card style={styles.list}>
