@@ -44,20 +44,20 @@ router.get('/:sessionId', function(req, res, next) {
 
 });
 
-router.patch('/:sessionId', function(req, res, next) {
+router.patch('/:sessionId', async function(req, res, next) {
     // 400 Bad Request for wrong class index
     const {error} = validateSession(req.params.sessionId);
     if (error)
         return res.status(400).send("The session index can only be integers.");
 
     let arrival_time = 1000000000
-    pool.query('CALL update_student_status(?,?,?,?)',[req.params.sessionId,req.body.studentId,req.body.attendance,arrival_time],function (err,rows,fields) {
-        console.log(err)
-        if (err) return res.status(500).send('Error when updating the student status');
-        else{
-            return res.status(200).send()
-        }
+    await req.body.forEach(bodyJson => {
+        pool.query('CALL update_student_status(?,?,?,?)',[req.params.sessionId,bodyJson.studentId,bodyJson.attendance,arrival_time],function (err,rows,fields) {
+            console.log(err)
+            if (err) return res.status(500).send('Error when updating the student status');
+        });
     });
+    return res.status(200).send();
 });
 
 // validate the class index is integers.

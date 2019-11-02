@@ -1,7 +1,7 @@
 'use strict'
 
-global.Blob = require('blob'),
-global.CUDA_VISIBLE_DEVICES="-1";
+global.Blob = require('blob');
+// global.CUDA_VISIBLE_DEVICES="-1";
 
 const env = require(process.env.node_env),
       faceapi = require('face-api.js'),
@@ -24,7 +24,6 @@ function controller(){
 
 // used for facial recognition
 controller.prototype.detectFace = async function(recognitionData, imageBase64, res){
-  console.log("testhere1");
   try{
     await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODELS_URL);
     await faceapi.nets.faceLandmark68Net.loadFromDisk(MODELS_URL);

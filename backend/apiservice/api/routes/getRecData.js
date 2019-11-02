@@ -29,7 +29,7 @@ router.get('/', function(req,res){
         });
         const json = JSON.stringify(array, null, 4);
         fs.writeFileSync(env.recData, json, 'utf8');
-        res.send('Finished Loading recognition Data.');
+        res.status(200).send('Finished Loading recognition Data.');
     });
 });
 
@@ -42,18 +42,20 @@ recognizeFace = async function(){
         console.log(label);
         const descriptions = [];
         const images = await fs.readdir(env.faceDB + label);
+        console.log(images);
         for (let i = 0; i < images.length; i++) {
             try {
-                const img = await canvas.loadImage(env.faceDB + label + '/' + images[i]);
+                var imagePath = env.faceDB + label + '/' + images[i];
+                console.log("Loading image: " + imagePath);
+                const img = await canvas.loadImage(imagePath);
+                const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+                if (typeof detections != 'undefined') {
+                    descriptions.push(detections.descriptor);
+                    console.log('finished loading ' + images[i] + '\t\t detected');
+                } else console.log('finished loading ' + images[i] + '\t\t undetected');
             } catch(err){
-                console.log(err);
-                continue;
+                console.log("error:" +err);
             }
-            const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-            if (typeof detections != 'undefined') {
-                descriptions.push(detections.descriptor);
-                console.log('finished loading ' + images[i] + '\t\t detected');
-            } else console.log('finished loading ' + images[i] + '\t\t undetected');
         }
         return {label: label, descriptors: descriptions};
     }));
