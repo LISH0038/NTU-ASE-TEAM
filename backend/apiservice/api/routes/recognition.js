@@ -28,9 +28,11 @@ router.post('/', function(req, res, next) {
 
   pool.query('CALL get_absent_students(?)',[req.body.sessionId],function (err,rows,fields) {
     if (err) return res.status(500).send('Error when retrieving the session');
+    console.log("retrieved:");
+    console.log(rows[0]);
     if (rows[0].length == 0) return res.status(404).send('The session id was not found');
     rows[0].forEach(row => absentStudents.push(row.student_id));
-    console.log(absentStudents);
+    console.log("absent students: " + absentStudents);
 
     pool.query('CALL get_class_start_late_absent_time(?)',[req.body.sessionId],async function (err,rows,fields) {
       if (err) return res.status(500).send('Error when retrieving the session');
@@ -84,14 +86,11 @@ router.post('/', function(req, res, next) {
         var imageBase64 = await req.body.imageName.replace(/^data:image\/\w+;base64,/, "");
         var buf = await new Buffer(imageBase64, 'base64');
         // var id = await env.images + '1.png';
-        //TODO: solve problems with saving image
         var image="/opt/images/"+`${new Date().getTime()}.jpeg`;
         fs.writeFile(image, buf, {encoding:'base64'}, async (err) => {
           if (err) throw err;
-          console.log("saved");
           const img = await canvas.loadImage(image);
           const canvas1 = faceapi.createCanvasFromMedia(img);
-          console.log("issue post loading");
           const displaySize = { width: img.width, height: img.height }
           faceapi.matchDimensions(canvas1, displaySize);
           const detections = await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
@@ -102,7 +101,11 @@ router.post('/', function(req, res, next) {
               console.log("comparing with " + j + " of " + labeledFaceDescriptors[i]._label + " data: " + dist);
             }
           }
-          const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor));
+          const results = await resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor));
+          console.log("results : " + results);
+          console.log(results);
+          console.log("===");
+
           const returnedIds = [];
 
           results.forEach((result, i) => {
@@ -110,14 +113,21 @@ router.post('/', function(req, res, next) {
               returnedIds.push(result.toString().split("_")[0]);
             }
           });
-          console.log(returnedIds);
+          console.log("returnedIds: "+ returnedIds);
           // return { canvas: canvas1.toDataURL(), recognizedStudentIds: returnedIds};
-          returnedJson = { recognizedStudentIds: returnedIds};
-
-          for (let i=0; i< returnedJson.recognizedStudentIds.length; i++) {
-            var studentId = returnedJson.recognizedStudentIds[i];
+          // returnedJson = {recognizedStudentIds: returnedIds};
+          let recognizedStudentList = [];
+          console.log("Absent students:" + absentStudents);
+          console.log(returnedIds.length);
+          for (let i = 0; i < returnedIds.length; i++) {
+            var studentId = returnedIds[i];
+            console.log("studentId:"+ studentId);
             if (!!absentStudents.includes(studentId)) {
               pool.query('CALL get_student(?)', [studentId], function (err, rows, fields) {
+                if (err || rows[0].length == 0) {
+                  console.log("no students found.");
+                }
+                else{
                 var studentName = rows[0][0].student_name;
                 var status = getStudentStatus(current_time, session_start_time, session_late_time, session_absent_time);
                 // returned list
@@ -128,22 +138,26 @@ router.post('/', function(req, res, next) {
                 });
 
                 // todo: check update database
-                pool.query('CALL update_student_status(?,?,?,?)', [req.body.sessionId, studentId, status, current_time], function (err,rows,fields) {
+                pool.query('CALL update_student_status(?,?,?,?)', [req.body.sessionId, studentId, status, current_time], function (err, rows, fields) {
                   console.log("session: " + req.body.sessionId + "; studentId: " + studentId + "; status: " + status + "; cur_time: " + current_time);
                 });
 
                 // return
-                if (i == returnedJson.recognizedStudentIds.length - 1) {
+                if (i == returnedIds.length - 1) {
+                  console.log("Posting to frontend: " + recognizedStudentList);
                   console.log(recognizedStudentList);
                   return res.status(200).json({
-                    box: returnedJson.box,
-                    // imageName: returnedJsonRecognized.imageName,
                     recognizedStudentIds: recognizedStudentList
                   });
                 }
+              }
               });
+            } else{
+              console.log("student present: " + studentId);
+              return res.status(200).send({recognizedStudentList:[]});
             }
           }
+
 
         });
       }catch(err){ throw 'Error in controllers/faceDetector.js (detectFace):\n'+err; }
