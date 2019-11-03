@@ -195,7 +195,7 @@ class MainScreen extends Component{
       this.absentList.current.setState({items:tmp});
     }
     else if (courseDetails.onTimeList !=null){
-      
+
       if (courseDetails.onTimeList.length >0) {
         let tmp={};
         console.log(courseDetails.onTimeList);
@@ -224,7 +224,7 @@ class MainScreen extends Component{
         this.absentList.current.setState({items:tmp});
       }
     }
-    
+
     // this.timerID = setInterval(
     //   () => this.faceRecognition(),
     //   5000
@@ -246,9 +246,12 @@ class MainScreen extends Component{
           url:     'http://localhost:3000/recognition',
           data:    {sessionId:"1", imageName:img}
         }).then(function (response) {
+          console.log("reach here.");
           console.log(response);
-          let recogList = JSON.parse(response).recognizedStudentIds;
+          let recogList = response.data.recognizedStudentIds;
+          console.log(recogList);
           if (recogList.length>0){
+            console.log(this.presentList.current.state.items);
             recogList.forEach(s=>{
               if (s.status ==="on-time" && !Object.keys(this.presentList.current.state.items).includes(s)){
                 //this.state.presentList.push(s);
@@ -330,7 +333,7 @@ class MainScreen extends Component{
     require('axios')({
       method:'post',
       url:     'http://localhost:3000/register',
-      data:   data 
+      data:   data
     }).then(function (response) {
       console.log('statusCode:', response && response.statusCode);
     })
@@ -357,12 +360,12 @@ class MainScreen extends Component{
     },1000);
     this.setState({timerId:id});
 
-    setTimeout(() => { 
+    setTimeout(() => {
       clearInterval(id);
       //console.log(images);
       this.callRegisterAPI(images);
     }, 11000);
-    
+
   }
 
   render(){
@@ -379,7 +382,7 @@ class MainScreen extends Component{
               </Card>
           </Grid>
           <Grid item xs={6}>
-          
+
             <Card style={styles.mainCamera}>
               <CardContent>
               <h3>---- Current Time: {this.state.currentTime.toLocaleTimeString()}  ----  Session ID: {this.state.sessionId}  ----</h3>
@@ -418,7 +421,7 @@ class MainScreen extends Component{
             <button onClick={this.openModal} className=" btn-lg  btn-block " style={{
                 background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white"
               }} >Unrecognised?</button>
-              <Popup 
+              <Popup
                   open={this.state.open}
                   closeOnDocumentClick
                   onClose={this.closeModal}>
@@ -426,7 +429,7 @@ class MainScreen extends Component{
                 <div>
                   <h3>{this.state.timer>10 ? "Please input your matric number then click start button.":this.state.timer>1 ? "Please keep rotating your head. "+this.state.timer : "You may close the window now"}</h3>
                   <Webcam ref={this.popupWebcam}>
-                    
+
                     flex={1}
                     audio = {false}
                     width={300}
@@ -448,17 +451,17 @@ class MainScreen extends Component{
         </Grid>
       </div>
     );}
-    else 
+    else
     return (
       <div style={{textAlign:"center",display: "inline-block"}}>
-        <Table 
-        style={{display:"inline-block"}} 
-        backFunction={this.closeSummaryReport} 
-        index={this.state.index} 
+        <Table
+        style={{display:"inline-block"}}
+        backFunction={this.closeSummaryReport}
+        index={this.state.index}
         sessionId={this.state.sessionId}
         ></Table>
       </div>
-      
+
     );
   }
 }
