@@ -16,7 +16,6 @@ const styles = {
   container: {
     padding: "10px",
     "justify-content": "center",
-    //display: "inline-flex",
     "max-height": "100vh",
   },
   list: {
@@ -28,9 +27,6 @@ const styles = {
   }
 };
 
-//TODO:
-//2. stop sending request once time limit reached
-//4. send report
 class MainScreen extends Component{
 
   constructor(){
@@ -42,59 +38,10 @@ class MainScreen extends Component{
     this.popupWebcam = React.createRef();
     this.inputElement = React.createRef();
     this.mockResCount =0;
-    // this.initStudentList = [
-    //   {
-    //       "id": "U1620058E",
-    //       "name": "Harry Cao"
-    //   },
-    //   {
-    //       "id": "U1620575J",
-    //       "name": "Zeng Jinpo"
-    //   },
-    //   {
-    //       "id": "U1721882B",
-    //       "name": "Rajasekara Pandian Akshaya Muthu"
-    //   },
-    //   {
-    //       "id": "U1721642E",
-    //       "name": "MN Shaanmugam"
-    //   },
-    //   {
-    //       "id": "U1622186B",
-    //       "name": "Li Shanlan"
-    //   },
-    //   {
-    //       "id": "N1902163K",
-    //       "name": "Simon El Nahas Christensen"
-    //   }
-    // ];
-    // this.mockRes = [
-    //   {
-    //     "id": "N1902163K",
-    //     "name": "Simon El Nahas Christensen"
-    //   },
-    //   {
-    //       "id": "U1721642E",
-    //       "name": "MN Shaanmugam"
-    //   },
-    //   {
-    //     "id": "U1620058E",
-    //     "name": "Harry Cao"
-    //   },
-    //   {
-    //       "id": "U1620575J",
-    //       "name": "Zeng Jinpo"
-    //   },
-    //   {
-    //     "id": "U1721882B",
-    //     "name": "Rajasekara Pandian Akshaya Muthu"
-    // },
-    //   {
-    //       "id": "U1622186B",
-    //       "name": "Li Shanlan"
-    //   },
-    // ];
-  }
+    //this.setState(this.props.location.state.details);
+
+    console.log(this.state);
+    }
 
   state = {
     wait:false,
@@ -109,9 +56,43 @@ class MainScreen extends Component{
     currentTime: new Date(),
     summaryReport: false,
     unrecog: false,
+    courseDetails: null,
   }
 
   componentDidMount() {
+    const request = require('request');
+    if (this.state.sessionId != null){
+      request('http://localhost:3000/record/'+ this.state.sessionId, (error, response, body) =>{
+        console.error('error:', error); // Print the error if one occurred
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        console.log('body:', body); // Print the HTML for the Google homepage.
+        let courseDetails = JSON.parse(body);
+        this.setState({courseDetails: courseDetails}, () =>{
+          this.initList();
+          if (courseDetails.sessionId != null)
+          this.setState({sessionId:courseDetails.sessionId});
+          if (courseDetails.index != null)
+          this.setState({index:courseDetails.index});
+        
+        });
+
+      });
+    }
+    else {
+      request('http://localhost:3000/index/'+ this.state.index, (error, response, body) => {
+        console.error('error:', error); // Print the error if one occurred
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        console.log('body:', body); // Print the HTML for the Google homepage.
+        let courseDetails = JSON.parse(body);
+        this.setState({courseDetails: courseDetails}, () =>{
+          this.initList();
+          if (courseDetails.sessionId != null)
+          this.setState({sessionId:courseDetails.sessionId});
+          if (courseDetails.index != null)
+          this.setState({index:courseDetails.index});
+        });
+      });
+    }
     // let courseDetails = {
     //   "index": 10001,
     //   "sessionId": 1,
@@ -146,6 +127,9 @@ class MainScreen extends Component{
     //     "id": "U1721882B",
     //     "name": "Rajasekara Pandian Akshaya Muthu"
     // }]};
+    // this.setState({courseDetails: courseDetails}, () =>{
+    //   this.initList();
+    // });
     // let courseDetails = {
     //   "index": 10001,
     //   "sessionId": 1,
@@ -180,11 +164,25 @@ class MainScreen extends Component{
     //           "name": "Simon El Nahas Christensen"
     //       }
     //     ]};
-    let courseDetails = this.props.location.state.details;
-    if (courseDetails.sessionId != null)
-      this.setState({sessionId:courseDetails.sessionId});
-    if (courseDetails.index != null)
-      this.setState({index:courseDetails.index});
+    // if (courseDetails.sessionId != null)
+    //   this.setState({sessionId:courseDetails.sessionId});
+    // if (courseDetails.index != null)
+    //   this.setState({index:courseDetails.index});
+    
+    this.timerID2 = setInterval(
+      () => this.setState({currentTime: new Date()}),
+      1000
+    );
+
+  }
+
+  componentDidUpdate(){
+    if (!this.state.summaryReport)
+      this.initList();
+  }
+
+  initList = () =>{
+    let courseDetails = this.state.courseDetails;
     if (courseDetails.studentList !=null){
       console.log(courseDetails.studentList);
       let tmp={};
@@ -224,17 +222,6 @@ class MainScreen extends Component{
         this.absentList.current.setState({items:tmp});
       }
     }
-
-    // this.timerID = setInterval(
-    //   () => this.faceRecognition(),
-    //   5000
-    // );
-
-    this.timerID2 = setInterval(
-      () => this.setState({currentTime: new Date()}),
-      1000
-    );
-
   }
 
   faceRecognition= async () => {
@@ -305,7 +292,6 @@ class MainScreen extends Component{
     clearInterval(this.state.timerId);
     this.setState({ open: true});
     this.setState({timer:4});
-    // setInterval(this.setState({reset:true}),2000);
   }
   closeModal=() =>{
     clearInterval(this.state.timerId);
@@ -314,10 +300,12 @@ class MainScreen extends Component{
 
   showSummaryReport = () =>{
     this.setState({summaryReport: true});
+    console.log(this.absentList);
   }
 
   closeSummaryReport = () =>{
     this.setState({summaryReport: false});
+    console.log(this.absentList);
   }
 
   onInputId = (event)=> {
@@ -356,7 +344,6 @@ class MainScreen extends Component{
     {
       if (!!this.popupWebcam.current) {
         images.push(this.popupWebcam.current.getScreenshot());
-        // images.push(this.popupWebcam.current.getScreenshot());
       }
 
       console.log(this.state.timer);
@@ -378,6 +365,7 @@ class MainScreen extends Component{
   }
 
   render(){
+
     if (!this.state.summaryReport){
     return (
       <div>
@@ -436,7 +424,7 @@ class MainScreen extends Component{
                   onClose={this.closeModal}>
                 <br></br>
                 <div>
-                  <h3>{this.state.timer>3 ? "Please input your matric number then click start button.":this.state.timer>1 ? "Please keep rotating your head. "+this.state.timer : "You may close the window now"}</h3>
+                  <h3>{this.state.timer>3 ? "Please input your matric number then click start button.":this.state.timer>1 ? "Taking photo now... "+this.state.timer : "You may close the window now"}</h3>
                   <Webcam
                     ref={this.popupWebcam}
                     audio = {false}

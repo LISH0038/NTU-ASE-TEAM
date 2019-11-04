@@ -5,11 +5,20 @@ import { withRouter, Redirect} from "react-router-dom";
 class Home extends React.Component {
 
   state ={
-    index:"10001",
+    index:null,
     sessionId:null,
     details:null,
     redirect:false
   };
+
+  componentDidMount() {
+    const request = require('request');
+    request('http://localhost:3000/generateRecData/', (error, response, body) =>{
+        console.error('error:', error); // Print the error if one occurred
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        console.log('body:', body); // Print the HTML for the Google homepage.
+      });
+  }
 
   onChangeIndex = (event)=> {
     this.setState({index: event.target.value});
@@ -20,80 +29,7 @@ class Home extends React.Component {
   };
 
   submitAndRedirect = ()=>{
-    const request = require('request');
-    if (this.state.sessionId != null){
-      request('http://localhost:3000/record/'+ this.state.sessionId, (error, response, body) =>{
-        console.error('error:', error); // Print the error if one occurred
-        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        console.log('body:', body); // Print the HTML for the Google homepage.
-        this.setState({details:JSON.parse(body),redirect:true});
-      });
-    }
-    else{
-      request('http://localhost:3000/index/'+ this.state.index, (error, response, body) =>{
-        console.error('error:', error); // Print the error if one occurred
-        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        console.log('body:', body); // Print the HTML for the Google homepage.
-        this.setState({details:JSON.parse(body),redirect:true});
-      });
-    }
-
-    // let mockRes = {
-    //   "index": 10001,
-    //   "sessionId": 1,
-    //   "schedule": {
-    //       "startTime": 1570176000,
-    //       "lateTime": 1570176600,
-    //       "endTime": 1570177200
-    //   },
-    //   "absentList": [
-    //       {
-    //           "id": "U1620058E",
-    //           "name": "Harry Cao"
-    //       },
-    //       {
-    //           "id": "U1721642E",
-    //           "name": "MN Shaanmugam"
-    //       },
-
-    //       {
-    //           "id": "N1902163K",
-    //           "name": "Simon El Nahas Christensen"
-    //       }
-    //     ],
-    //   "onTimeList":[          {
-    //     "id": "U1622186B",
-    //     "name": "Li Shanlan"
-    //       },          {
-    //         "id": "U1620575J",
-    //         "name": "Zeng Jinpo"
-    //     }],
-    //   "lateList":[          {
-    //     "id": "U1721882B",
-    //     "name": "Rajasekara Pandian Akshaya Muthu"
-    // }]};
-
-    //   let Mock2 = {
-    //     "index":"xxx",
-    //     "schedule":{"startTime":"152623456123",
-    //                   "lateTime": "152623456999",
-    //                   "endTime": "152623460000"},
-    //     "onTimeList": [{"id": "xxxxxx",
-    //       "name": "xxx",
-    //         },
-    //     {"id": "xxxxxx",
-    //       "name": "xxx",
-    //         },
-    //     {"id": "xxxxxx",
-    //       "name": "xxx",
-    //         },
-    //     {"id": "xxxxxx",
-    //       "name": "xxx",
-    //       }],
-    //     "lateList":[],
-    //     "absentList":[]
-    //     };
-    //  this.setState({details:mockRes,redirect:true});
+      this.setState({details:{index:this.state.index,sessionId:this.state.sessionId},redirect:true});
   };
 
   renderMainscreen = (details)=> {
