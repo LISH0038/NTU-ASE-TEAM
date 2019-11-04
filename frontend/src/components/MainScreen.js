@@ -38,7 +38,6 @@ class MainScreen extends Component{
     this.popupWebcam = React.createRef();
     this.inputElement = React.createRef();
     this.mockResCount =0;
-    //this.setState(this.props.location.state.details);
 
     console.log(this.state);
     }
@@ -60,9 +59,11 @@ class MainScreen extends Component{
   }
 
   componentDidMount() {
+    let details = this.props.location.state.details;
+
     const request = require('request');
-    if (this.state.sessionId != null){
-      request('http://localhost:3000/record/'+ this.state.sessionId, (error, response, body) =>{
+    if (details.sessionId != null){
+      request('http://localhost:3000/record/'+ details.sessionId, (error, response, body) =>{
         console.error('error:', error); // Print the error if one occurred
         console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
         console.log('body:', body); // Print the HTML for the Google homepage.
@@ -79,7 +80,7 @@ class MainScreen extends Component{
       });
     }
     else {
-      request('http://localhost:3000/index/'+ this.state.index, (error, response, body) => {
+      request('http://localhost:3000/index/'+ details.index, (error, response, body) => {
         console.error('error:', error); // Print the error if one occurred
         console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
         console.log('body:', body); // Print the HTML for the Google homepage.
