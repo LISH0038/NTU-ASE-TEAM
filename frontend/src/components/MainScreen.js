@@ -56,81 +56,82 @@ class MainScreen extends Component{
     summaryReport: false,
     unrecog: false,
     courseDetails: null,
+    toggle:false,
   }
 
   componentDidMount() {
     let details = this.props.location.state.details;
 
-    const request = require('request');
-    if (details.sessionId != null){
-      request('http://localhost:3000/record/'+ details.sessionId, (error, response, body) =>{
-        console.error('error:', error); // Print the error if one occurred
-        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        console.log('body:', body); // Print the HTML for the Google homepage.
-        let courseDetails = JSON.parse(body);
-        this.setState({courseDetails: courseDetails}, () =>{
-          this.initList();
-          if (courseDetails.sessionId != null)
-          this.setState({sessionId:courseDetails.sessionId});
-          if (courseDetails.index != null)
-          this.setState({index:courseDetails.index});
+    // const request = require('request');
+    // if (details.sessionId != null){
+    //   request('http://localhost:3000/record/'+ details.sessionId, (error, response, body) =>{
+    //     console.error('error:', error); // Print the error if one occurred
+    //     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    //     console.log('body:', body); // Print the HTML for the Google homepage.
+    //     let courseDetails = JSON.parse(body);
+    //     this.setState({courseDetails: courseDetails}, () =>{
+    //       this.initList();
+    //       if (courseDetails.sessionId != null)
+    //       this.setState({sessionId:courseDetails.sessionId});
+    //       if (courseDetails.index != null)
+    //       this.setState({index:courseDetails.index});
         
-        });
+    //     });
 
-      });
-    }
-    else {
-      request('http://localhost:3000/index/'+ details.index, (error, response, body) => {
-        console.error('error:', error); // Print the error if one occurred
-        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        console.log('body:', body); // Print the HTML for the Google homepage.
-        let courseDetails = JSON.parse(body);
-        this.setState({courseDetails: courseDetails}, () =>{
-          this.initList();
-          if (courseDetails.sessionId != null)
-          this.setState({sessionId:courseDetails.sessionId});
-          if (courseDetails.index != null)
-          this.setState({index:courseDetails.index});
-        });
-      });
-    }
-    // let courseDetails = {
-    //   "index": 10001,
-    //   "sessionId": 1,
-    //   "schedule": {
-    //       "startTime": 1570176000,
-    //       "lateTime": 1570176600,
-    //       "endTime": 1570177200
-    //   },
-    //   "absentList": [
-    //       {
-    //           "id": "U1620058E",
-    //           "name": "Harry Cao"
-    //       },
-    //       {
-    //           "id": "U1721642E",
-    //           "name": "MN Shaanmugam"
-    //       },
+    //   });
+    // }
+    // else {
+    //   request('http://localhost:3000/index/'+ details.index, (error, response, body) => {
+    //     console.error('error:', error); // Print the error if one occurred
+    //     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    //     console.log('body:', body); // Print the HTML for the Google homepage.
+    //     let courseDetails = JSON.parse(body);
+    //     this.setState({courseDetails: courseDetails}, () =>{
+    //       this.initList();
+    //       if (courseDetails.sessionId != null)
+    //       this.setState({sessionId:courseDetails.sessionId});
+    //       if (courseDetails.index != null)
+    //       this.setState({index:courseDetails.index});
+    //     });
+    //   });
+    // }
+    let courseDetails = {
+      "index": 10001,
+      "sessionId": 1,
+      "schedule": {
+          "startTime": 1570176000,
+          "lateTime": 1570176600,
+          "endTime": 1570177200
+      },
+      "absentList": [
+          {
+              "id": "U1620058E",
+              "name": "Harry Cao"
+          },
+          {
+              "id": "U1721642E",
+              "name": "MN Shaanmugam"
+          },
 
-    //       {
-    //           "id": "N1902163K",
-    //           "name": "Simon El Nahas Christensen"
-    //       }
-    //     ],
-    //   "onTimeList":[          {
-    //     "id": "U1622186B",
-    //     "name": "Li Shanlan"
-    //       },          {
-    //         "id": "U1620575J",
-    //         "name": "Zeng Jinpo"
-    //     }],
-    //   "lateList":[          {
-    //     "id": "U1721882B",
-    //     "name": "Rajasekara Pandian Akshaya Muthu"
-    // }]};
-    // this.setState({courseDetails: courseDetails}, () =>{
-    //   this.initList();
-    // });
+          {
+              "id": "N1902163K",
+              "name": "Simon El Nahas Christensen"
+          }
+        ],
+      "onTimeList":[          {
+        "id": "U1622186B",
+        "name": "Li Shanlan"
+          },          {
+            "id": "U1620575J",
+            "name": "Zeng Jinpo"
+        }],
+      "lateList":[          {
+        "id": "U1721882B",
+        "name": "Rajasekara Pandian Akshaya Muthu"
+    }]};
+    this.setState({courseDetails: courseDetails}, () =>{
+      this.initList();
+    });
     // let courseDetails = {
     //   "index": 10001,
     //   "sessionId": 1,
@@ -165,10 +166,10 @@ class MainScreen extends Component{
     //           "name": "Simon El Nahas Christensen"
     //       }
     //     ]};
-    // if (courseDetails.sessionId != null)
-    //   this.setState({sessionId:courseDetails.sessionId});
-    // if (courseDetails.index != null)
-    //   this.setState({index:courseDetails.index});
+    if (courseDetails.sessionId != null)
+      this.setState({sessionId:courseDetails.sessionId});
+    if (courseDetails.index != null)
+      this.setState({index:courseDetails.index});
     
     this.timerID2 = setInterval(
       () => this.setState({currentTime: new Date()}),
@@ -178,8 +179,10 @@ class MainScreen extends Component{
   }
 
   componentDidUpdate(){
-    if (!this.state.summaryReport)
+    if (!this.state.summaryReport && this.state.toggle)
       this.initList();
+    if (this.state.toggle)
+      this.setState({toggle:false});
   }
 
   initList = () =>{
@@ -301,52 +304,48 @@ class MainScreen extends Component{
 
   showSummaryReport = () =>{
     this.setState({summaryReport: true});
-    console.log(this.absentList);
   }
 
   closeSummaryReport = () =>{
-    this.setState({summaryReport: false});
-    console.log(this.absentList);
+    this.setState({summaryReport: false, toggle:true});
   }
 
   onInputId = (event)=> {
     this.setState({idToRegister: event.target.value});
   };
 
-  callRegisterAPI = (images ) =>{
-    let data = {sessionId:"1", studentId:this.state.idToRegister, images: images}
-    console.log(data);
-
-    require('axios')({
-      method:'post',
-      url:     'http://localhost:3000/register',
-      data:   data
-    }).then((response)=> {
-      console.log(response);
-      let body = response.data;
-
-      if (body.status === "late"){
-        this.lateList.current.addItemHandler(body.id,body.name);
-        this.absentList.current.onDeleteHandler(body.id);
-      }
-      else {
-        this.presentList.current.addItemHandler(body.id, body.name);
-        this.absentList.current.onDeleteHandler(body.id);
-      }
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+  callRegisterAPI = () =>{
+    if (!!this.popupWebcam.current) {
+      let data = {sessionId:"1", studentId:this.state.idToRegister, images: this.popupWebcam.current.getScreenshot()}
+      console.log(data);
+  
+      require('axios')({
+        method:'post',
+        url:     'http://localhost:3000/register',
+        data:   data
+      }).then((response)=> {
+        console.log(response);
+        let body = response.data;
+  
+        if (body.status === "late"){
+          this.lateList.current.addItemHandler(body.id,body.name);
+          this.absentList.current.onDeleteHandler(body.id);
+        }
+        else {
+          this.presentList.current.addItemHandler(body.id, body.name);
+          this.absentList.current.onDeleteHandler(body.id);
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    }
   }
 
   startRegister = () =>{
-    let images = [];
+    this.callRegisterAPI();
     let id = setInterval(()=>
     {
-      if (!!this.popupWebcam.current) {
-        images.push(this.popupWebcam.current.getScreenshot());
-      }
-
       console.log(this.state.timer);
       if (this.state.timer===1){
         this.setState({timer:"You may close this window now."});
@@ -360,8 +359,7 @@ class MainScreen extends Component{
     setTimeout(() => {
       clearInterval(id);
       //console.log(images);
-      this.callRegisterAPI(images);
-    }, 4000);
+    }, 5000);
 
   }
 
@@ -425,7 +423,7 @@ class MainScreen extends Component{
                   onClose={this.closeModal}>
                 <br></br>
                 <div>
-                  <h3>{this.state.timer>3 ? "Please input your matric number then click start button.":this.state.timer>1 ? "Taking photo now... "+this.state.timer : "You may close the window now"}</h3>
+                  <h3>{this.state.timer>3 ? "Please input your matric number then click start button.":this.state.timer>0 ? "Taking photo now... "+this.state.timer : "You may close the window now"}</h3>
                   <Webcam
                     ref={this.popupWebcam}
                     audio = {false}
