@@ -1,7 +1,9 @@
 import React from "react";
 import "./css/App.css";
-import Nav from "./components/Nav";import MainScreen from "./components/MainScreen";
+import Nav from "./components/Nav";
+import MainScreen from "./components/MainScreen";
 import Home from "./components/Home";
+
 // import SummaryReport from "./components/SummaryReport";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 

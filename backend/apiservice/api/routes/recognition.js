@@ -122,40 +122,38 @@ router.post('/', function(req, res, next) {
           for (let i = 0; i < returnedIds.length; i++) {
             var studentId = returnedIds[i];
             console.log("studentId:"+ studentId);
-            if (!!absentStudents.includes(studentId)) {
-              pool.query('CALL get_student(?)', [studentId], function (err, rows, fields) {
-                if (err || rows[0].length == 0) {
-                  console.log("no students found.");
-                }
-                else{
-                var studentName = rows[0][0].student_name;
-                var status = getStudentStatus(current_time, session_start_time, session_late_time, session_absent_time);
-                // returned list
-                recognizedStudentList.push({
-                  id: studentId,
-                  name: studentName,
-                  status: status
-                });
+
+            pool.query('CALL get_student(?)', [studentId], function (err, rows, fields) {
+              if (err || rows[0].length == 0) {
+                console.log("no students found.");
+              }
+              else{
+              var studentName = rows[0][0].student_name;
+              var status = getStudentStatus(current_time, session_start_time, session_late_time, session_absent_time);
+              // returned list
+              recognizedStudentList.push({
+                id: studentId,
+                name: studentName,
+                status: status
+              });
+              if (!!absentStudents.includes(studentId)) {
 
                 // todo: check update database
                 pool.query('CALL update_student_status(?,?,?,?)', [req.body.sessionId, studentId, status, current_time], function (err, rows, fields) {
                   console.log("session: " + req.body.sessionId + "; studentId: " + studentId + "; status: " + status + "; cur_time: " + current_time);
                 });
+              }
 
-                // return
-                if (i == returnedIds.length - 1) {
-                  console.log("Posting to frontend: " + recognizedStudentList);
-                  console.log(recognizedStudentList);
-                  return res.status(200).json({
-                    recognizedStudentIds: recognizedStudentList
-                  });
-                }
+              // return
+              if (i == returnedIds.length - 1) {
+                console.log("Posting to frontend: " + recognizedStudentList);
+                console.log(recognizedStudentList);
+                return res.status(200).json({
+                  recognizedStudentIds: recognizedStudentList
+                });
+              }
               }
               });
-            } else{
-              console.log("student present: " + studentId);
-              return res.status(200).send({recognizedStudentList:[]});
-            }
           }
 
 

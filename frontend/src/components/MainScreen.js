@@ -245,12 +245,13 @@ class MainScreen extends Component{
           method:'post',
           url:     'http://localhost:3000/recognition',
           data:    {sessionId:"1", imageName:img}
-        }).then(function (response) {
-          console.log("reach here.");
+        }).then((response)=> {
+          console.log("response: ");
           console.log(response);
           let recogList = response.data.recognizedStudentIds;
+          console.log("recogList: ");
           console.log(recogList);
-          if (recogList.length>0){
+          if (recogList){
             console.log(this.presentList.current.state.items);
             recogList.forEach(s=>{
               if (s.status ==="on-time" && !Object.keys(this.presentList.current.state.items).includes(s)){
@@ -303,7 +304,7 @@ class MainScreen extends Component{
   openModal=() =>{
     clearInterval(this.state.timerId);
     this.setState({ open: true});
-    this.setState({timer:11});
+    this.setState({timer:4});
     // setInterval(this.setState({reset:true}),2000);
   }
   closeModal=() =>{
@@ -327,15 +328,22 @@ class MainScreen extends Component{
     let data = {sessionId:"1", studentId:this.state.idToRegister, images: images}
     console.log(data);
 
-    this.presentList.current.addItemHandler(this.state.idToRegister,"Name");
-    this.absentList.current.onDeleteHandler(this.state.idToRegister);
-
     require('axios')({
       method:'post',
       url:     'http://localhost:3000/register',
       data:   data
-    }).then(function (response) {
-      console.log('statusCode:', response && response.statusCode);
+    }).then((response)=> {
+      console.log(response);
+      let body = response.data;
+
+      if (body.status === "late"){
+        this.lateList.current.addItemHandler(body.id,body.name);
+        this.absentList.current.onDeleteHandler(body.id);
+      }
+      else {
+        this.presentList.current.addItemHandler(body.id, body.name);
+        this.absentList.current.onDeleteHandler(body.id);
+      }
     })
     .catch(function (error) {
       console.log(error);
@@ -343,11 +351,12 @@ class MainScreen extends Component{
   }
 
   startRegister = () =>{
-    let images = []
+    let images = [];
     let id = setInterval(()=>
     {
       if (!!this.popupWebcam.current) {
         images.push(this.popupWebcam.current.getScreenshot());
+        // images.push(this.popupWebcam.current.getScreenshot());
       }
 
       console.log(this.state.timer);
@@ -364,7 +373,7 @@ class MainScreen extends Component{
       clearInterval(id);
       //console.log(images);
       this.callRegisterAPI(images);
-    }, 11000);
+    }, 4000);
 
   }
 
@@ -427,15 +436,14 @@ class MainScreen extends Component{
                   onClose={this.closeModal}>
                 <br></br>
                 <div>
-                  <h3>{this.state.timer>10 ? "Please input your matric number then click start button.":this.state.timer>1 ? "Please keep rotating your head. "+this.state.timer : "You may close the window now"}</h3>
-                  <Webcam ref={this.popupWebcam}>
-
-                    flex={1}
+                  <h3>{this.state.timer>3 ? "Please input your matric number then click start button.":this.state.timer>1 ? "Please keep rotating your head. "+this.state.timer : "You may close the window now"}</h3>
+                  <Webcam
+                    ref={this.popupWebcam}
                     audio = {false}
+                    flex={1}
                     width={300}
                     height={200}
-                    screenshotFormat={"image/jpeg"}
-                  </Webcam>
+                    screenshotFormat={"image/jpeg"} />
                   <Input placeholder="Matric No." style={{ fontSize: '23px' }} onChange={this.onInputId}/>
                   <button onClick={this.startRegister} className=" btn-lg  btn-block " style={{
                     background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white"

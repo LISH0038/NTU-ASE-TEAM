@@ -38,9 +38,21 @@ router.post('/', function(req, res, next) {
           if (err) {
             return res.status(500).send('Unable to create folder');
           } else {
+            // remove files in folder
+            fs.readdir(env.faceDB + studentIdName, (err, files) => {
+              if (err) throw err;
+
+              for (const file of files) {
+                fs.unlink(path.join(directory, file), err => {
+                  if (err) throw err;
+                });
+              }
+            });
               await save_images(req.body.images, studentIdName).then(()=>{
+                console.log("all images saved.");
               pool.query('CALL get_student_status(?,?)', [req.body.sessionId, req.body.studentId], function (err, rows, fields) {
                 let student_status = rows[0][0].attend_status;
+                console.log("current status: "+student_status);
 
                 if (student_status=="absent"){
                   // const current_time = Math.floor(Date.now()/1000);
@@ -51,17 +63,21 @@ router.post('/', function(req, res, next) {
                     let session_start_time = rows[0][0].start_time;
                     let session_late_time = session_start_time + rows[0][0].late_time * 60;
                     let session_absent_time = session_start_time + rows[0][0].absent_time * 60;
-                    student_status = getStudentStatus(current_time, session_start_time, session_late_time, session_absent_time);
-                    pool.query('CALL update_student_status(?,?,?,?)', [req.body.sessionId, studentId, student_status, current_time], function (err,rows,fields) {
+                    let new_student_status = getStudentStatus(current_time, session_start_time, session_late_time, session_absent_time);
+                    pool.query('CALL update_student_status(?,?,?,?)', [req.body.sessionId, studentId, new_student_status, current_time], function (err,rows,fields) {
                       if (err) return res.status(500).send('Error when updating the student status');
+                      console.log("returning1: " + studentId + "_" + studentName + "_" + new_student_status);
                       return res.status(200).send(
                           {id: studentId,
                             name: studentName,
-                            status: student_status});
+                            status: new_student_status});
                     });
                   });
                 } else{
-                  return res.status(200).send();
+                  console.log("returning: " + studentId + "_" + studentName + "_" + student_status);
+                  return res.status(200).send({id: studentId,
+                    name: studentName,
+                    status: student_status});
                 }
               });
             });
@@ -78,12 +94,16 @@ router.post('/', function(req, res, next) {
 async function save_each_image(imageBase64String,studentIdName){
   let imageBase64 = await imageBase64String.replace(/^data:image\/\w+;base64,/, "");
   let buf = await new Buffer(imageBase64, 'base64');
-  let image = env.faceDB + studentIdName + "/" + `${new Date().getTime()}.jpeg`;
-  await fs.writeFile(image, buf, {encoding: 'base64'});
+  let image = env.faceDB + studentIdName + "/" + Math.random() + "_" + `${new Date().getTime()}.jpeg`;
+  await fs.writeFile(image, buf, {encoding: 'base64'},async (err)=>{
+    if (err) throw err;
+    console.log("saved: " + image);
+  });
 }
 
 async function save_images(images, studentIdName, res){
-  let promises = images.map(imageBase64String => save_each_image(imageBase64String,studentIdName));
+  console.log("Storing images.");
+  let promises = await images.map(imageBase64String => save_each_image(imageBase64String,studentIdName));
   await Promise.all(promises);
 }
 

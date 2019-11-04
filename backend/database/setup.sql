@@ -51,7 +51,8 @@ INSERT INTO student (student_id, student_name, email) VALUES
   ('U1721882B','Rajasekara Pandian Akshaya Muthu','akshaya@e.ntu.edu.sg'),
   ('U1721642E','MN Shaanmugam','shaan@e.ntu.edu.sg'),
   ('U1622186B','Li Shanlan','shanlan@e.ntu.edu.sg'),
-  ('N1902163K','Simon El Nahas Christensen','simon@e.ntu.edu.sg');
+  ('N1902163K','Simon El Nahas Christensen','simon@e.ntu.edu.sg'),
+  ('U1620602A','Lin Beiyi','limbeiyi@e.ntu.edu.sg');
 
 INSERT INTO student_class (class_index, student_id) VALUES
   (10001, 'U1620058E'),
@@ -60,6 +61,7 @@ INSERT INTO student_class (class_index, student_id) VALUES
   (10001,'U1721642E'),
   (10001,'U1622186B'),
   (10001,'N1902163K'),
+  (10001,'U1620602A'),
   (10002, 'U1620058E'),
   (10002, 'U1620575J'),
   (10002,'U1721882B'),
@@ -79,12 +81,14 @@ INSERT INTO report (session_id, student_id, arrival_time, attend_status) VALUES
   (1, 'U1721642E', NULL, 'absent'),
   (1, 'U1622186B', NULL, 'absent'),
   (1, 'N1902163K', NULL, 'absent'),
+  (1, 'U1620602A', NULL, 'absent'),
   (2, 'U1620058E',NULL, 'absent'),
   (2, 'U1620575J', NULL, 'absent'),
   (2, 'U1721882B', NULL, 'absent'),
   (2, 'U1721642E', NULL, 'absent'),
   (2, 'U1622186B', NULL, 'absent'),
   (2, 'N1902163K', NULL, 'absent'),
+  (2, 'U1620602A', NULL, 'absent'),
   (3, 'U1620058E',NULL, 'absent'),
   (3, 'U1620575J', NULL, 'absent'),
   (3, 'U1721882B', NULL, 'absent'),
@@ -242,9 +246,6 @@ BEGIN
     where report.session_id=session_id and report.student_id = student_id;
 END //
 DELIMITER ;
-
-call update_student_status(1,'U1721882B','exempted',NULL);
-
 
 DROP PROCEDURE IF EXISTS get_student_status;
 DELIMITER //
