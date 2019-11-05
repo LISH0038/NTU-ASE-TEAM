@@ -1,17 +1,17 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var Canvas = require('canvas');
+let express = require('express');
+let path = require('path');
+let cookieParser = require('cookie-parser');
+let logger = require('morgan');
+let Canvas = require('canvas');
 
-var classRouter = require('./routes/class');
-var recognitionRouter = require('./routes/recognition');
-var registerRouter = require('./routes/register');
-var recordRouter = require('./routes/record');
-var getRecDataRouter = require('./routes/getRecData');
-var reportRouter = require('./routes/report');
-var bodyParser = require('body-parser');
-var app = express();
+let classRouter = require('./routes/class');
+let recognitionRouter = require('./routes/recognition');
+let registerRouter = require('./routes/register');
+let recordRouter = require('./routes/record');
+let getRecDataRouter = require('./routes/getRecData');
+let reportRouter = require('./routes/report');
+let bodyParser = require('body-parser');
+let app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -23,7 +23,7 @@ app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-var cors = require('cors');
+let cors = require('cors');
 app.use(cors());
 
 app.use(logger('dev'));

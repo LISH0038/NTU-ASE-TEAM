@@ -10,12 +10,10 @@ const env = require(process.env.node_env),
       fetch = require('node-fetch'),
       fs = require('fs-extra'),
       tf = require('@tensorflow/tfjs-node'),
-      distanceThreshold = 0.4,
       MODELS_URL = path.join(__dirname, '/../public/models/'),
-    base64ToImage = require('base64-to-image');
-
-const regex_folder = RegExp('^[a-zA-Z][0-9]{7}[a-zA-Z]_.*'); // Folder name match in FaceDB
-const regex_id = RegExp('^[a-zA-Z][0-9]{7}[a-zA-Z]'); // Matric id match in FaceDB
+    base64ToImage = require('base64-to-image'),
+    regex_folder = RegExp('^[a-zA-Z][0-9]{7}[a-zA-Z]_.*'), // Folder name match in FaceDB
+    regex_id = RegExp('^[a-zA-Z][0-9]{7}[a-zA-Z]'); // Matric id match in FaceDB
 
 function controller(){
   const { Canvas, Image, ImageData } = canvas;
@@ -23,28 +21,27 @@ function controller(){
 }
 
 // used for facial recognition
-controller.prototype.detectFace = async function(recognitionData, imageBase64, res){
+controller.prototype.detectFace = async function(recognitionData, imageBase64, callback){
   try{
     await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODELS_URL);
     await faceapi.nets.faceLandmark68Net.loadFromDisk(MODELS_URL);
     await faceapi.nets.faceRecognitionNet.loadFromDisk(MODELS_URL);
     await faceapi.tf.setBackend('tensorflow');
     const labeledFaceDescriptors = await recogData(recognitionData);
-    const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, distanceThreshold);
-    console.log("issue pre11111 loading");
+    const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, env.scoreThreshold);
 
-    var data = await imageBase64.replace(/^data:image\/\w+;base64,/, "");
-    var buf = await new Buffer(data, 'base64');
+    let data = await imageBase64.replace(/^data:image\/\w+;base64,/, "");
+    let buf = await new Buffer(data, 'base64');
     // var id = await env.images + '1.png';
     //TODO: solve problems with saving image
-    var image="/opt/images/"+`${new Date().getTime()}.jpeg`;
-    fs.writeFile(image, buf, {encoding:'base64'}, async (err) => {
+    let image="/opt/images/"+`${new Date().getTime()}.jpeg`;
+    await fs.writeFile(image, buf, {encoding:'base64'}, async (err) => {
       if (err) throw err;
       console.log("saved");
       const img = await canvas.loadImage(image);
       const canvas1 = faceapi.createCanvasFromMedia(img);
       console.log("issue post loading");
-      const displaySize = { width: img.width, height: img.height }
+      const displaySize = { width: img.width, height: img.height };
       faceapi.matchDimensions(canvas1, displaySize);
       const detections = await faceapi.detectAllFaces(img).withFaceLandmarks().withFaceDescriptors();
       const resizedDetections = faceapi.resizeResults(detections, displaySize);
@@ -58,24 +55,84 @@ controller.prototype.detectFace = async function(recognitionData, imageBase64, r
       const returnedIds = [];
 
       results.forEach((result, i) => {
-
-        // const box = resizedDetections[i].detection.box;
-        // const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString().split("_")[1]});
         if (regex_id.test(result.toString().split("_")[0])) {
           returnedIds.push(result.toString().split("_")[0]);
         }
-        // drawBox.draw(canvas1);
       });
-      console.log(returnedIds);
-      // return { canvas: canvas1.toDataURL(), recognizedStudentIds: returnedIds};
-      return res.json({ recognizedStudentIds: returnedIds});
+
+      callback(returnedIds);
     });
   }catch(err){ throw 'Error in controllers/faceDetector.js (detectFace):\n'+err; }
 }
 
+// save each image and update RecData.json
+controller.prototype.registerFace = async function (imageBase64String,studentIdName, recognitionData){
+  await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODELS_URL);
+  await faceapi.nets.faceLandmark68Net.loadFromDisk(MODELS_URL);
+  await faceapi.nets.faceRecognitionNet.loadFromDisk(MODELS_URL);
+  await faceapi.tf.setBackend('tensorflow');
+  let imageBase64 = await imageBase64String.replace(/^data:image\/\w+;base64,/, "");
+  let buf = await new Buffer(imageBase64, 'base64');
+  let folder_dir = env.faceDB + studentIdName;
+
+  if (!fs.existsSync(folder_dir)){
+    fs.mkdirSync(folder_dir);
+  } else{
+    // remove the bad images from the folder.
+    fs.readdir(folder_dir, (err, files) => {
+      if (err) throw err;
+
+      for (const file of files) {
+        fs.unlink(path.join(folder_dir, file), err => {
+          if (err) throw err;
+        });
+      }
+    });
+  }
+
+  let image = folder_dir + "/" + Math.random() + "_" + `${new Date().getTime()}.jpeg`;
+
+  // add photo into the directory
+  await fs.writeFile(image, buf, {encoding: 'base64'},async (err)=>{
+    if (err) throw err;
+    console.log("saved: " + image);
+    const img = await canvas.loadImage(image);
+    console.log("studengIdName: "+ studentIdName);
+    const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+    const array = [];
+    for (let i=0; i<recognitionData.length; i++){
+      const obj = { label: recognitionData[i].label };
+      if (recognitionData[i].label == studentIdName){
+        obj.descriptors = [];
+        if (typeof detections != 'undefined') {
+          [detections.descriptor].forEach(descriptor => {
+            const des = Array.prototype.slice.call(descriptor);
+            obj.descriptors.push(des);
+          });
+        } else{
+         console.log("undefined");
+        }
+      } else{
+        obj.descriptors = [];
+        recognitionData[i].descriptors.forEach(descriptor => {
+          const des = Array.prototype.slice.call(descriptor);
+          obj.descriptors.push(des);
+        });
+      }
+      array.push(obj);
+    }
+    const json = JSON.stringify(array, null, 4);
+    fs.writeFileSync(env.recData, json, 'utf8');
+    console.log("updated recData.json.");
+    return;
+  });
+
+
+}
+
 // recognize face from image
 // used in '/recdata' to form RecData.json as reference database
-controller.prototype.recognizeFace = async function(){
+controller.prototype.recognizeFaceFromFaceDB = async function(){
   try{
     await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODELS_URL);
     await faceapi.nets.faceLandmark68Net.loadFromDisk(MODELS_URL);
@@ -86,21 +143,24 @@ controller.prototype.recognizeFace = async function(){
         const descriptions = [];
         const images = await fs.readdir(env.faceDB + label);
         for (let i = 0; i < images.length; i++) {
-          const img = await canvas.loadImage(env.faceDB + label + '/' + images[i]);
-          const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-          if (typeof detections != 'undefined') {
-            descriptions.push(detections.descriptor);
-            console.log('finished loading ' + images[i] + '\t\t detected');
-          } else console.log('finished loading ' + images[i] + '\t\t undetected');
+          try {
+            const img = await canvas.loadImage(env.faceDB + label + '/' + images[i]);
+            const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+            if (typeof detections != 'undefined') {
+              descriptions.push(detections.descriptor);
+              console.log('finished loading ' + images[i] + '\t\t detected');
+            } else console.log('finished loading ' + images[i] + '\t\t undetected');
+          } catch(err){
+            // error in loading image
+            continue;
+          }
         }
         return {label: label, descriptors: descriptions};
-        // return new faceapi.LabeledFaceDescriptors(label, descriptions);
-
     }));
   }catch(err){ throw 'Error in controller/faceDetector.js (recognizeFace):\n'+err; }
 }
 
-// convert picture into labeled face descriptors
+// get RecData
 async function recogData(data){
   try{
     return Promise.all(data.map(d => {

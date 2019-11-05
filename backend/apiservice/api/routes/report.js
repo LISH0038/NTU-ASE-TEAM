@@ -1,6 +1,6 @@
-var express = require('express');
-var router = express.Router();
-var pool = require('../db/pool');
+let express = require('express');
+let router = express.Router();
+let pool = require('../db/pool');
 const Joi = require('joi');
 
 /* GET report. */
@@ -10,8 +10,8 @@ router.get('/:sessionId', function(req, res, next) {
     if (error)
         return res.status(400).send("The session index can only be integers.");
 
-    var class_index;
-    var studentList = [];
+    let class_index;
+    let studentList = [];
 
     pool.query('CALL get_class_start_late_absent_time(?)',[req.params.sessionId],function (err,rows,fields) {
         console.log(err)

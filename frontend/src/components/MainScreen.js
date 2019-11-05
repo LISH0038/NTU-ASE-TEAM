@@ -83,7 +83,7 @@ class MainScreen extends Component{
           this.setState({sessionId:courseDetails.sessionId});
           if (courseDetails.index != null)
           this.setState({index:courseDetails.index});
-        
+
         });
 
       });
@@ -318,7 +318,7 @@ class MainScreen extends Component{
     if (!!this.popupWebcam.current) {
       let data = {sessionId:"1", studentId:this.state.idToRegister, images: this.popupWebcam.current.getScreenshot()}
       console.log(data);
-  
+
       require('axios')({
         method:'post',
         url:     'http://localhost:3000/register',
@@ -326,7 +326,7 @@ class MainScreen extends Component{
       }).then((response)=> {
         console.log(response);
         let body = response.data;
-  
+
         if (body.status === "late"){
           this.lateList.current.addItemHandler(body.id,body.name);
           this.absentList.current.onDeleteHandler(body.id);

@@ -4,9 +4,9 @@
  * Module dependencies.
  */
 
-var app = require('../app');
-var debug = require('debug')('backend:server');
-var http = require('http');
+let app = require('../app');
+let debug = require('debug')('backend:server');
+let http = require('http');
 var env = require('../develConfig.js');
 /**
  * Get port from environment and store in Express.

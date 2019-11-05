@@ -24,9 +24,12 @@ class Table extends Component {
       method:'get',
       url:     'http://localhost:3000/report/'+this.props.sessionId,
     }).then(function (response) {
-      console.log('statusCode:', response && response.statusCode);
-      this.setState({students:JSON.parse(response).students});
-    })
+      console.log(response);
+      // console.log('statusCode:', response && response.statusCode);
+      console.log("students");
+      console.log(response.data.students);
+      this.setState({students: response.data.students});
+    }.bind(this))
     .catch(function (error) {
       console.log(error);
     });
@@ -66,7 +69,7 @@ class Table extends Component {
     require('axios')({
       method:'patch',
       url:     'http://localhost:3000/report/'+this.props.sessionId,
-      data:   data 
+      data:   data
     }).then(function (response) {
       console.log('statusCode:', response && response.statusCode);
     })
@@ -141,7 +144,7 @@ class Table extends Component {
             {this.renderTableData()}
           </tbody>
         </table>
-        <Popup 
+        <Popup
           open={this.state.open}
           closeOnDocumentClick
           onClose={this.closeModal}>
@@ -153,7 +156,7 @@ class Table extends Component {
             background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white"
           }} >Submit</button>
         </div>
-        
+
         </Popup>
         <button onClick={this.toggleEditMode} className=" btn-lg  btn-block " style={{
           background: 'rgb(22, 77, 124)', fontSize: '23px', color: "white", margin: "10px 10px", width:"15%", display:"inline-block"

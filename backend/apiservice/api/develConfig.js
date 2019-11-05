@@ -6,9 +6,9 @@ module.exports = {
   models: __dirname+'/public/models',
 
   /* FaceDetector Config */
-  minConfidence: 0.4,
+  minConfidence: 0.35,
   inputSize: 408,
-  scoreThreshold: 0.4,
+  scoreThreshold: 0.35,
   minFaceSize: 50,
   scaleFactor: 0.8,
 

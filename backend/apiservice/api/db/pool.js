@@ -1,4 +1,4 @@
-var mysql = require('mysql');
+let mysql = require('mysql');
 
 const pool = mysql.createPool({
   connectionLimit : 10,
