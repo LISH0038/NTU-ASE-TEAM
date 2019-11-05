@@ -60,78 +60,85 @@ class MainScreen extends Component{
   }
 
   componentDidMount() {
+    this.getCourseInfo();
+    this.timerID2 = setInterval(
+      () => this.setState({currentTime: new Date()}),
+      1000
+    );
+  }
+
+  getCourseInfo() {
     let details = this.props.location.state.details;
 
-    // const request = require('request');
-    // if (details.sessionId != null){
-    //   request('http://localhost:3000/record/'+ details.sessionId, (error, response, body) =>{
-    //     console.error('error:', error); // Print the error if one occurred
-    //     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    //     console.log('body:', body); // Print the HTML for the Google homepage.
-    //     let courseDetails = JSON.parse(body);
-    //     this.setState({courseDetails: courseDetails}, () =>{
-    //       this.initList();
-    //       if (courseDetails.sessionId != null)
-    //       this.setState({sessionId:courseDetails.sessionId});
-    //       if (courseDetails.index != null)
-    //       this.setState({index:courseDetails.index});
+    const request = require('request');
+    if (details.sessionId != null){
+      request('http://localhost:3000/record/'+ details.sessionId, (error, response, body) =>{
+        console.error('error:', error); // Print the error if one occurred
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        console.log('body:', body); // Print the HTML for the Google homepage.
+        let courseDetails = JSON.parse(body);
+        this.setState({courseDetails: courseDetails}, () =>{
+          this.initList(courseDetails);
+          if (courseDetails.sessionId != null)
+          this.setState({sessionId:courseDetails.sessionId});
+          if (courseDetails.index != null)
+          this.setState({index:courseDetails.index});
         
-    //     });
+        });
 
-    //   });
-    // }
-    // else {
-    //   request('http://localhost:3000/index/'+ details.index, (error, response, body) => {
-    //     console.error('error:', error); // Print the error if one occurred
-    //     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    //     console.log('body:', body); // Print the HTML for the Google homepage.
-    //     let courseDetails = JSON.parse(body);
-    //     this.setState({courseDetails: courseDetails}, () =>{
-    //       this.initList();
-    //       if (courseDetails.sessionId != null)
-    //       this.setState({sessionId:courseDetails.sessionId});
-    //       if (courseDetails.index != null)
-    //       this.setState({index:courseDetails.index});
-    //     });
-    //   });
-    // }
-    let courseDetails = {
-      "index": 10001,
-      "sessionId": 1,
-      "schedule": {
-          "startTime": 1570176000,
-          "lateTime": 1570176600,
-          "endTime": 1570177200
-      },
-      "absentList": [
-          {
-              "id": "U1620058E",
-              "name": "Harry Cao"
-          },
-          {
-              "id": "U1721642E",
-              "name": "MN Shaanmugam"
-          },
+      });
+    }
+    else {
+      request('http://localhost:3000/index/'+ details.index, (error, response, body) => {
+        console.error('error:', error); // Print the error if one occurred
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        console.log('body:', body); // Print the HTML for the Google homepage.
+        let courseDetails = JSON.parse(body);
+        this.setState({courseDetails: courseDetails}, () =>{
+          this.initList(courseDetails);
+          if (courseDetails.sessionId != null)
+          this.setState({sessionId:courseDetails.sessionId});
+          if (courseDetails.index != null)
+          this.setState({index:courseDetails.index});
+        });
+      });
+    }
+    // let courseDetails = {
+    //   "index": 10001,
+    //   "sessionId": 1,
+    //   "schedule": {
+    //       "startTime": 1570176000,
+    //       "lateTime": 1570176600,
+    //       "endTime": 1570177200
+    //   },
+    //   "absentList": [
+    //       {
+    //           "id": "U1620058E",
+    //           "name": "Harry Cao"
+    //       },
+    //       {
+    //           "id": "U1721642E",
+    //           "name": "MN Shaanmugam"
+    //       },
 
-          {
-              "id": "N1902163K",
-              "name": "Simon El Nahas Christensen"
-          }
-        ],
-      "onTimeList":[          {
-        "id": "U1622186B",
-        "name": "Li Shanlan"
-          },          {
-            "id": "U1620575J",
-            "name": "Zeng Jinpo"
-        }],
-      "lateList":[          {
-        "id": "U1721882B",
-        "name": "Rajasekara Pandian Akshaya Muthu"
-    }]};
-    this.setState({courseDetails: courseDetails}, () =>{
-      this.initList();
-    });
+    //       {
+    //           "id": "N1902163K",
+    //           "name": "Simon El Nahas Christensen"
+    //       }
+    //     ],
+    //   "onTimeList":[          {
+    //     "id": "U1622186B",
+    //     "name": "Li Shanlan"
+    //       },          {
+    //         "id": "U1620575J",
+    //         "name": "Zeng Jinpo"
+    //     }],
+    //   "lateList":[          {
+    //     "id": "U1721882B",
+    //     "name": "Rajasekara Pandian Akshaya Muthu"
+    // }]};
+    // this.setState({courseDetails: courseDetails});
+    // this.initList(courseDetails);
     // let courseDetails = {
     //   "index": 10001,
     //   "sessionId": 1,
@@ -166,27 +173,20 @@ class MainScreen extends Component{
     //           "name": "Simon El Nahas Christensen"
     //       }
     //     ]};
-    if (courseDetails.sessionId != null)
-      this.setState({sessionId:courseDetails.sessionId});
-    if (courseDetails.index != null)
-      this.setState({index:courseDetails.index});
-    
-    this.timerID2 = setInterval(
-      () => this.setState({currentTime: new Date()}),
-      1000
-    );
-
+    // if (courseDetails.sessionId != null)
+    //   this.setState({sessionId:courseDetails.sessionId});
+    // if (courseDetails.index != null)
+    //   this.setState({index:courseDetails.index});
   }
 
   componentDidUpdate(){
     if (!this.state.summaryReport && this.state.toggle)
-      this.initList();
+      this.getCourseInfo();
     if (this.state.toggle)
       this.setState({toggle:false});
   }
 
-  initList = () =>{
-    let courseDetails = this.state.courseDetails;
+  initList = (courseDetails) =>{
     if (courseDetails.studentList !=null){
       console.log(courseDetails.studentList);
       let tmp={};
@@ -213,7 +213,7 @@ class MainScreen extends Component{
         courseDetails.lateList.forEach(s =>{
           tmp[s.id]=s.name;
         });
-        console.log("onTimeList: "+ tmp);
+        console.log("lateList: "+ tmp);
         this.lateList.current.setState({items:tmp});
       }
       if (courseDetails.absentList.length >0) {
@@ -222,7 +222,7 @@ class MainScreen extends Component{
         courseDetails.absentList.forEach(s =>{
           tmp[s.id]=s.name;
         });
-        console.log("onTimeList: "+ tmp);
+        console.log("absentList: "+ tmp);
         this.absentList.current.setState({items:tmp});
       }
     }
