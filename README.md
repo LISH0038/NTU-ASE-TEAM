@@ -10,3 +10,8 @@ Automatically taking attendance using facial recognition
 2. Go to apps: `cd ./apps`
 3. Run `docker-compose up`
 4. Access the app at *localhost:8080/home*
+
+To stop running:
+
+1. Go to apps: `cd ./apps`
+2. Run `docker-compose down`
