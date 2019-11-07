@@ -1,0 +1,46 @@
+version: '3.3'
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:8080"
+    volumes:
+     - ./frontend/web:/app/web
+  webserver:
+    image: nginx:mainline-alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - ./nginx/nginx-conf:/etc/nginx/conf.d
+    depends_on:
+      - apiservice
+  apiservice:
+    build: ./apiservice
+    expose:
+      - '3000'
+    depends_on:
+     - db
+    environment:
+     - DATABASE_HOST=db
+     - DATABASE_DATABSE=ase
+     - DATABASE_USER=harry
+     - DATABASE_PASSWORD=password
+    volumes:
+     - ase-fs:/opt/images
+     - ./apiservice/api:/app/api
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'ase'
+      MYSQL_USER: 'harry'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3306:3306'
+    volumes:
+      - ase-db:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+volumes:
+  ase-fs:
+  ase-db:

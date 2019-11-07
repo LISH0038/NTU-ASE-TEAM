@@ -1,0 +1,105 @@
+.App {
+  text-align: center;
+  background: lightblue;
+  min-height: 100vh;
+}
+
+nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  min-height: 10vh;
+  background: rgb(22, 77, 124);
+  color: whitesmoke;
+}
+
+.Nav-Links {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  list-style: none;
+}
+
+.loginForm {
+  width: 100%;
+  padding-top: 5cm;
+  max-width: 400px;
+  padding: 15px;
+  margin: auto;
+  height: 370px;
+  border-radius: 2%;
+  position: center;
+  background: rgb(22, 77, 124);
+}
+
+#title {
+  text-align: center;
+  font-family: arial, sans-serif;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+#students {
+  text-align: center;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  border: 3px solid #ddd;
+  width: 100%;
+  width: 1500px;
+}
+
+#students td,
+#students th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#students tr:nth-child(EVEN) {
+  background-color: #eff3f5;
+}
+
+#students tr:hover {
+  background-color: #ddd;
+}
+
+#students th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: rgb(22, 77, 124);
+  color: whitesmoke;
+}
+
+.modal {
+  font-size: 12px;
+}
+.modal > .header {
+  width: 100%;
+  border-bottom: 1px solid gray;
+  font-size: 18px;
+  text-align: center;
+  padding: 5px;
+}
+.modal > .content {
+  width: 100%;
+  padding: 10px 5px;
+}
+.modal > .actions {
+  width: 100%;
+  padding: 10px 5px;
+  margin: auto;
+  text-align: center;
+}
+.modal > .close {
+  cursor: pointer;
+  position: absolute;
+  display: block;
+  padding: 2px 5px;
+  line-height: 20px;
+  right: -10px;
+  top: -10px;
+  font-size: 24px;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #cfcece;
+}
