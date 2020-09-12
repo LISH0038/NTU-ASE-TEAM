@@ -25,7 +25,7 @@
     "mkdirp": "^0.5.1",
     "morgan": "~1.9.1",
     "mysql": "^2.17.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "nodemon": "^1.19.1",
     "path": "^0.12.7",
     "rn-fetch-blob": "^0.10.16"
